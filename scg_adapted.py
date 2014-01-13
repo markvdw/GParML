@@ -83,6 +83,7 @@ def SCG_adapted(f_and_gradf, local_optimisation, x, optargs=(), maxiters=500, ma
     function_eval number of fn evaluations
     status: string describing convergence status
     """
+
     if xtol is None:
         xtol = 1e-6
     if ftol is None:
@@ -246,5 +247,9 @@ def SCG_adapted(f_and_gradf, local_optimisation, x, optargs=(), maxiters=500, ma
 
     if display:
         print_out(len_maxiters, display, fnow, current_grad, beta, iteration)
-        print 
+        print
+
+    print('')
+    print(status)
+
     return x, flog, function_eval, status

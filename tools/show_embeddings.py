@@ -34,6 +34,7 @@ def run(opt, args):
         print('Error: X path does not exist...')
         exit()
 
+    # Latent space dimensions to plot
     dims = opt.dimension
 
     vprint("Displaying X in '%s'..."% embdir)
@@ -45,13 +46,13 @@ def run(opt, args):
     embfiles = sorted(glob.glob(embdir + '/embeddings/*.embedding*'))
     varfiles = sorted(glob.glob(embdir + '/embeddings/*.variance*'))
 
-    X = None
+    parGPLVM_X = None
     for emb, var in itertools.izip(embfiles, varfiles):
         embmat = sp.load(emb)
-        if (X is None):
-            X = embmat
+        if (parGPLVM_X is None):
+            parGPLVM_X = embmat
         else:
-            X = np.vstack((X, embmat))
+            parGPLVM_X = np.vstack((parGPLVM_X, embmat))
 
     # Read the input data
     Y = None
@@ -92,26 +93,26 @@ def run(opt, args):
     if (opt.plot2d):
         # Plot the X
         fig = plt.figure()
-        plt.plot(X[:, dims[0]], X[:, dims[1]], 'x')
+        plt.plot(parGPLVM_X[:, dims[0]], parGPLVM_X[:, dims[1]], 'x')
         pp.savefig(fig)
         plt.title('First two dimensions of the latent space.')
 
         for dy in opt.output_dimension:
             fig = plt.figure()
-            plt.plot(X[:, dims[0]], Y[:, dy], 'x')
-            plt.title('Latent space dim vs data')
+            plt.plot(parGPLVM_X[:, dims[0]], Y[:, dy], 'x')
+            plt.title('First latent space dim vs data %i' % dy)
 
 
     # Plot the outputs as a func of the X
-    if (not opt.output_dimension is None):
-        for dy in opt.output_dimension:
-            fig = plt.figure()
-            ax = fig.gca(projection='3d')
-            ax.plot(X[:, dims[0]], X[:, dims[1]], Y[:, dy], 'x')
-            ax.set_xlabel('Embedding dim %u' % dims[0])
-            ax.set_ylabel('Embedding dim %u' % dims[1])
-            ax.set_zlabel('Data dim %u' % dy)
-            pp.savefig(fig)
+    # if (not opt.output_dimension is None):
+    #     for dy in opt.output_dimension:
+    #         fig = plt.figure()
+    #         ax = fig.gca(projection='3d')
+    #         ax.plot(X[:, dims[0]], X[:, dims[1]], Y[:, dy], 'x')
+    #         ax.set_xlabel('Embedding dim %u' % dims[0])
+    #         ax.set_ylabel('Embedding dim %u' % dims[1])
+    #         ax.set_zlabel('Data dim %u' % dy)
+    #         pp.savefig(fig)
 
     pp.close()
 
@@ -119,6 +120,8 @@ def run(opt, args):
         vprint('3D plotting not implemented yet.')
 
     plt.show()
+
+    return parGPLVM_X
 
 if __name__ == '__main__':
     usage = "usage: %prog [options] data_dir"

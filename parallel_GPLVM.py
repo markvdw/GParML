@@ -57,6 +57,7 @@ import random
 import subprocess
 import glob
 import partial_terms as pt
+import scg_adapted
 from scg_adapted import SCG_adapted
 
 options = {}
@@ -86,7 +87,7 @@ def main(opt_param = None):
     # Transform the positiv parameters to be in the range (-Inf, Inf)
     x0 = numpy.array([transform_back(b, x) for b, x in zip(options['flat_global_statistics_bounds'], x0)])
     # Todo: Nothing seems to be done with the end result of the global optimisation?
-    x_opt = SCG_adapted(likelihood_and_gradient, local_optimisation, x0, 
+    x_opt = SCG_adapted(likelihood_and_gradient, local_optimisation, x0,
         display=True, maxiters=options['iterations'])
     
     flat_array = x_opt[0]
@@ -206,7 +207,7 @@ def likelihood_and_gradient(flat_array, iteration):
         map_reduce.save(file_name, global_statistics[key])
 
     # Dispatch statistics Map-Reduce
-    print "Dispatching statistics Map-Reduce..."
+    #print "Dispatching statistics Map-Reduce..."
     start = time.time()
     # Cache matrices that only need be calculated once
     map_reduce.cache(options, global_statistics)
@@ -215,7 +216,7 @@ def likelihood_and_gradient(flat_array, iteration):
     print "Done! statistics Map-Reduce took ", int(end - start), " seconds"
 
     # Calculate global statistics
-    print "Calculating global statistics..."
+    #print "Calculating global statistics..."
     start = time.time()
     partial_derivatives, accumulated_statistics, partial_terms = calculate_global_statistics(options,
         global_statistics, accumulated_statistics_files, map_reduce)
@@ -245,12 +246,12 @@ def local_optimisation(flat_array):
             map_reduce.save(file_name, global_statistics[key])
 
         # Dispatch embeddings Map-Reduce to run in background if we're not using fixed embeddings
-        print "Dispatching embeddings Map-Reduce to run in background..."
+        #print "Dispatching embeddings Map-Reduce to run in background..."
         start = time.time()
         script_files = map_reduce.embeddings_MR(options)
 
         # Wait for embeddings Map-Reduce to finish if we're not using fixed embeddings
-        print "Waiting for embeddings Map-Reduce to finish..."
+        #print "Waiting for embeddings Map-Reduce to finish..."
         map_reduce.embeddings_watcher(options, script_files)
         end = time.time()
         print "Done! embeddings Map-Reduce took ", int(end - start), " seconds"

@@ -15,8 +15,8 @@ def gen_easydata(N, Q, D):
 
     for d in xrange(D):
         # For every column in Y, i.e. dimension d for all datapoints.
-        s = rnd.randn()
-        Y[:, d] = (s*1.1 * X + np.sin(s * X + rnd.randn() * 5.0)).squeeze()
+        s = rnd.randn()              # period
+        Y[:, d] = (s*1.03 * X + 0.5 * np.sin(2 * s * X + rnd.randn() * 5.0)).squeeze()
 
     Y += rnd.randn(N, D) * 0.05
 
