@@ -1,0 +1,1110 @@
+
+
+
+% Header, overrides base
+
+    % Make sure that the sphinx doc style knows who it inherits from.
+    \def\sphinxdocclass{article}
+
+    % Declare the document class
+    \documentclass[letterpaper,10pt,english]{/usr/share/sphinx/texinputs/sphinxhowto}
+
+    % Imports
+    \usepackage[utf8]{inputenc}
+    \DeclareUnicodeCharacter{00A0}{\\nobreakspace}
+    \usepackage[T1]{fontenc}
+    \usepackage{babel}
+    \usepackage{times}
+    \usepackage{import}
+    \usepackage[Bjarne]{/usr/share/sphinx/texinputs/fncychap}
+    \usepackage{longtable}
+    \usepackage{/usr/share/sphinx/texinputs/sphinx}
+    \usepackage{multirow}
+
+    \usepackage{amsmath}
+    \usepackage{amssymb}
+    \usepackage{ucs}
+    \usepackage{enumerate}
+
+    % Used to make the Input/Output rules follow around the contents.
+    \usepackage{needspace}
+
+    % Pygments requirements
+    \usepackage{fancyvrb}
+    \usepackage{color}
+    % ansi colors additions
+    \definecolor{darkgreen}{rgb}{.12,.54,.11}
+    \definecolor{lightgray}{gray}{.95}
+    \definecolor{brown}{rgb}{0.54,0.27,0.07}
+    \definecolor{purple}{rgb}{0.5,0.0,0.5}
+    \definecolor{darkgray}{gray}{0.25}
+    \definecolor{lightred}{rgb}{1.0,0.39,0.28}
+    \definecolor{lightgreen}{rgb}{0.48,0.99,0.0}
+    \definecolor{lightblue}{rgb}{0.53,0.81,0.92}
+    \definecolor{lightpurple}{rgb}{0.87,0.63,0.87}
+    \definecolor{lightcyan}{rgb}{0.5,1.0,0.83}
+
+    % Needed to box output/input
+    \usepackage{tikz}
+        \usetikzlibrary{calc,arrows,shadows}
+    \usepackage[framemethod=tikz]{mdframed}
+
+    \usepackage{alltt}
+
+    % Used to load and display graphics
+    \usepackage{graphicx}
+    \graphicspath{ {figs/} }
+    \usepackage[Export]{adjustbox} % To resize
+
+    % used so that images for notebooks which have spaces in the name can still be included
+    \usepackage{grffile}
+
+
+    % For formatting output while also word wrapping.
+    \usepackage{listings}
+    \lstset{breaklines=true}
+    \lstset{basicstyle=\small\ttfamily}
+    \def\smaller{\fontsize{9.5pt}{9.5pt}\selectfont}
+
+    %Pygments definitions
+    
+\makeatletter
+\def\PY@reset{\let\PY@it=\relax \let\PY@bf=\relax%
+    \let\PY@ul=\relax \let\PY@tc=\relax%
+    \let\PY@bc=\relax \let\PY@ff=\relax}
+\def\PY@tok#1{\csname PY@tok@#1\endcsname}
+\def\PY@toks#1+{\ifx\relax#1\empty\else%
+    \PY@tok{#1}\expandafter\PY@toks\fi}
+\def\PY@do#1{\PY@bc{\PY@tc{\PY@ul{%
+    \PY@it{\PY@bf{\PY@ff{#1}}}}}}}
+\def\PY#1#2{\PY@reset\PY@toks#1+\relax+\PY@do{#2}}
+
+\def\PY@tok@gd{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
+\def\PY@tok@gu{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
+\def\PY@tok@gt{\def\PY@tc##1{\textcolor[rgb]{0.00,0.25,0.82}{##1}}}
+\def\PY@tok@gs{\let\PY@bf=\textbf}
+\def\PY@tok@gr{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
+\def\PY@tok@cm{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\def\PY@tok@vg{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\def\PY@tok@m{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\def\PY@tok@mh{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\def\PY@tok@go{\def\PY@tc##1{\textcolor[rgb]{0.50,0.50,0.50}{##1}}}
+\def\PY@tok@ge{\let\PY@it=\textit}
+\def\PY@tok@vc{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\def\PY@tok@il{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\def\PY@tok@cs{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\def\PY@tok@cp{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
+\def\PY@tok@gi{\def\PY@tc##1{\textcolor[rgb]{0.00,0.63,0.00}{##1}}}
+\def\PY@tok@gh{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\def\PY@tok@ni{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
+\def\PY@tok@nl{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
+\def\PY@tok@nn{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\def\PY@tok@no{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
+\def\PY@tok@na{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
+\def\PY@tok@nb{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\def\PY@tok@nc{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\def\PY@tok@nd{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\def\PY@tok@ne{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
+\def\PY@tok@nf{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\def\PY@tok@si{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\def\PY@tok@s2{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\def\PY@tok@vi{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\def\PY@tok@nt{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\def\PY@tok@nv{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\def\PY@tok@s1{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\def\PY@tok@sh{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\def\PY@tok@sc{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\def\PY@tok@sx{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\def\PY@tok@bp{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\def\PY@tok@c1{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\def\PY@tok@kc{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\def\PY@tok@c{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\def\PY@tok@mf{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\def\PY@tok@err{\def\PY@bc##1{\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{##1}}}
+\def\PY@tok@kd{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\def\PY@tok@ss{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\def\PY@tok@sr{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\def\PY@tok@mo{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\def\PY@tok@kn{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\def\PY@tok@mi{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\def\PY@tok@gp{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\def\PY@tok@o{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\def\PY@tok@kr{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\def\PY@tok@s{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\def\PY@tok@kp{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\def\PY@tok@w{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\def\PY@tok@kt{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
+\def\PY@tok@ow{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\def\PY@tok@sb{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\def\PY@tok@k{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\def\PY@tok@se{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
+\def\PY@tok@sd{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+
+\def\PYZbs{\char`\\}
+\def\PYZus{\char`\_}
+\def\PYZob{\char`\{}
+\def\PYZcb{\char`\}}
+\def\PYZca{\char`\^}
+\def\PYZsh{\char`\#}
+\def\PYZpc{\char`\%}
+\def\PYZdl{\char`\$}
+\def\PYZti{\char`\~}
+% for compatibility with earlier versions
+\def\PYZat{@}
+\def\PYZlb{[}
+\def\PYZrb{]}
+\makeatother
+
+
+    %Set pygments styles if needed...
+    
+        \definecolor{nbframe-border}{rgb}{0.867,0.867,0.867}
+        \definecolor{nbframe-bg}{rgb}{0.969,0.969,0.969}
+        \definecolor{nbframe-in-prompt}{rgb}{0.0,0.0,0.502}
+        \definecolor{nbframe-out-prompt}{rgb}{0.545,0.0,0.0}
+
+        \newenvironment{ColorVerbatim}
+        {\begin{mdframed}[%
+            roundcorner=1.0pt, %
+            backgroundcolor=nbframe-bg, %
+            userdefinedwidth=1\linewidth, %
+            leftmargin=0.1\linewidth, %
+            innerleftmargin=0pt, %
+            innerrightmargin=0pt, %
+            linecolor=nbframe-border, %
+            linewidth=1pt, %
+            usetwoside=false, %
+            everyline=true, %
+            innerlinewidth=3pt, %
+            innerlinecolor=nbframe-bg, %
+            middlelinewidth=1pt, %
+            middlelinecolor=nbframe-bg, %
+            outerlinewidth=0.5pt, %
+            outerlinecolor=nbframe-border, %
+            needspace=0pt
+        ]}
+        {\end{mdframed}}
+        
+        \newenvironment{InvisibleVerbatim}
+        {\begin{mdframed}[leftmargin=0.1\linewidth,innerleftmargin=3pt,innerrightmargin=3pt, userdefinedwidth=1\linewidth, linewidth=0pt, linecolor=white, usetwoside=false]}
+        {\end{mdframed}}
+
+        \renewenvironment{Verbatim}[1][\unskip]
+        {\begin{alltt}\smaller}
+        {\end{alltt}}
+    
+
+    % Help prevent overflowing lines due to urls and other hard-to-break 
+    % entities.  This doesn't catch everything...
+    \sloppy
+
+    % Document level variables
+    \title{easydata}
+    \date{January 5, 2014}
+    \release{}
+    \author{Unknown Author}
+    \renewcommand{\releasename}{}
+
+    % TODO: Add option for the user to specify a logo for his/her export.
+    \newcommand{\sphinxlogo}{}
+
+    % Make the index page of the document.
+    \makeindex
+
+    % Import sphinx document type specifics.
+     
+
+
+% Body
+
+    % Start of the document
+    \begin{document}
+
+        
+            \maketitle
+        
+
+        
+
+
+        
+        
+
+    % Make sure that atleast 4 lines are below the HR
+    \needspace{4\baselineskip}
+
+    
+        \vspace{6pt}
+        \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-in-prompt}In\hspace{4pt}{[}56{]}:\hspace{4pt}}\\*
+        \vspace{-2.65\baselineskip}
+        \begin{ColorVerbatim}
+            \vspace{-0.7\baselineskip}
+            \begin{Verbatim}[commandchars=\\\{\}]
+\PY{o}{\PYZpc{}}\PY{k}{pylab} \PY{n}{inline}
+\PY{k+kn}{import} \PY{n+nn}{sys}
+\PY{k+kn}{import} \PY{n+nn}{glob}
+\PY{k+kn}{import} \PY{n+nn}{os}
+\PY{k+kn}{import} \PY{n+nn}{random}
+
+\PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k+kn}{as} \PY{n+nn}{np}
+\PY{k+kn}{import} \PY{n+nn}{numpy.linalg} \PY{k+kn}{as} \PY{n+nn}{linalg}
+\PY{k+kn}{import} \PY{n+nn}{numpy.random} \PY{k+kn}{as} \PY{n+nn}{rnd}
+\PY{k+kn}{from} \PY{n+nn}{mpl\PYZus{}toolkits.mplot3d.axes3d} \PY{k+kn}{import} \PY{n}{Axes3D}
+\end{Verbatim}
+
+            
+                \vspace{-0.2\baselineskip}
+            
+        \end{ColorVerbatim}
+    
+
+    
+
+        % If the first block is an image, minipage the image.  Else
+        % request a certain amount of space for the input text.
+        \needspace{4\baselineskip}
+        
+        
+
+            % Add document contents.
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+\begin{alltt}Populating the interactive namespace from numpy and matplotlib
+\end{alltt}
+
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+\begin{alltt}WARNING: pylab import has clobbered these variables: ['f', 'random']
+`\%pylab --no-import-all` prevents importing * from pylab and numpy
+\end{alltt}
+
+            \end{InvisibleVerbatim}
+            
+        
+    
+\part{Easydata GPLVM tests}\section{Generating the data}
+
+    % Make sure that atleast 4 lines are below the HR
+    \needspace{4\baselineskip}
+
+    
+        \vspace{6pt}
+        \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-in-prompt}In\hspace{4pt}{[}57{]}:\hspace{4pt}}\\*
+        \vspace{-2.65\baselineskip}
+        \begin{ColorVerbatim}
+            \vspace{-0.7\baselineskip}
+            \begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{sys}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{l+s}{'}\PY{l+s}{../tools/}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{sys}\PY{o}{.}\PY{n}{path}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{l+s}{'}\PY{l+s}{..}\PY{l+s}{'}\PY{p}{)}
+\PY{k+kn}{import} \PY{n+nn}{easy\PYZus{}dataset}
+
+\PY{n}{Y}\PY{p}{,} \PY{n}{Xt} \PY{o}{=} \PY{n}{easy\PYZus{}dataset}\PY{o}{.}\PY{n}{gen\PYZus{}easydata}\PY{p}{(}\PY{l+m+mi}{100}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{)}
+\end{Verbatim}
+
+            
+                \vspace{-0.2\baselineskip}
+            
+        \end{ColorVerbatim}
+    
+After generating the data, plot in 3D and then each dimension as a
+function of the latent variable X:
+
+    % Make sure that atleast 4 lines are below the HR
+    \needspace{4\baselineskip}
+
+    
+        \vspace{6pt}
+        \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-in-prompt}In\hspace{4pt}{[}58{]}:\hspace{4pt}}\\*
+        \vspace{-2.65\baselineskip}
+        \begin{ColorVerbatim}
+            \vspace{-0.7\baselineskip}
+            \begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{fig} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{ax} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{gca}\PY{p}{(}\PY{n}{projection}\PY{o}{=}\PY{l+s}{'}\PY{l+s}{3d}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{)}
+\PY{c}{\PYZsh{}ax.view\PYZus{}init(elev=60, azim=300)}
+\PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}title}\PY{p}{(}\PY{l+s}{'}\PY{l+s}{easydata}\PY{l+s}{'}\PY{p}{)}
+
+\PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,} \PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{12}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{)}\PY{p}{,} \PY{n}{dpi}\PY{o}{=}\PY{l+m+mi}{180}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{Xt}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{Xt}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{Xt}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{)}
+\end{Verbatim}
+
+            
+                \vspace{-0.2\baselineskip}
+            
+        \end{ColorVerbatim}
+    
+
+    
+
+        % If the first block is an image, minipage the image.  Else
+        % request a certain amount of space for the input text.
+        \needspace{4\baselineskip}
+        
+        
+
+            % Add document contents.
+            
+                \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-out-prompt}Out\hspace{4pt}{[}58{]}:\hspace{4pt}}\\*
+                \vspace{-2.55\baselineskip}\begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+\begin{alltt}[<matplotlib.lines.Line2D at 0x8709c10>]\end{alltt}
+
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+    \begin{center}
+    \includegraphics[max size={\textwidth}{\textheight}]{easydata_files/easydata_5_1.png}
+    \par
+    \end{center}
+    
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+    \begin{center}
+    \includegraphics[max size={\textwidth}{\textheight}]{easydata_files/easydata_5_2.png}
+    \par
+    \end{center}
+    
+            \end{InvisibleVerbatim}
+            
+        
+    
+\section{Initialisation with PCA}
+
+    % Make sure that atleast 4 lines are below the HR
+    \needspace{4\baselineskip}
+
+    
+        \vspace{6pt}
+        \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-in-prompt}In\hspace{4pt}{[}59{]}:\hspace{4pt}}\\*
+        \vspace{-2.65\baselineskip}
+        \begin{ColorVerbatim}
+            \vspace{-0.7\baselineskip}
+            \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{def} \PY{n+nf}{PCA}\PY{p}{(}\PY{n}{Y}\PY{p}{,} \PY{n}{input\PYZus{}dim}\PY{p}{)}\PY{p}{:}
+	\PY{n}{Z} \PY{o}{=} \PY{n}{numpy}\PY{o}{.}\PY{n}{linalg}\PY{o}{.}\PY{n}{svd}\PY{p}{(}\PY{n}{Y} \PY{o}{-} \PY{n}{Y}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{n}{full\PYZus{}matrices}\PY{o}{=}\PY{n+nb+bp}{False}\PY{p}{)}
+	\PY{p}{[}\PY{n}{X}\PY{p}{,} \PY{n}{W}\PY{p}{]} \PY{o}{=} \PY{p}{[}\PY{n}{Z}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{:}\PY{n}{input\PYZus{}dim}\PY{p}{]}\PY{p}{,} \PY{n}{numpy}\PY{o}{.}\PY{n}{dot}\PY{p}{(}\PY{n}{numpy}\PY{o}{.}\PY{n}{diag}\PY{p}{(}\PY{n}{Z}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{,} \PY{n}{Z}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{)}\PY{o}{.}\PY{n}{T}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{:}\PY{n}{input\PYZus{}dim}\PY{p}{]}\PY{p}{]}
+	\PY{n}{v} \PY{o}{=} \PY{n}{X}\PY{o}{.}\PY{n}{std}\PY{p}{(}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+	\PY{n}{X} \PY{o}{/}\PY{o}{=} \PY{n}{v}\PY{p}{;}
+	\PY{n}{W} \PY{o}{*}\PY{o}{=} \PY{n}{v}\PY{p}{;}
+	\PY{k}{return} \PY{n}{X}\PY{p}{,} \PY{n}{W}
+
+\PY{n}{X}\PY{p}{,} \PY{n}{W} \PY{o}{=} \PY{n}{PCA}\PY{p}{(}\PY{n}{Y}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{)}
+\end{Verbatim}
+
+            
+                \vspace{-0.2\baselineskip}
+            
+        \end{ColorVerbatim}
+    
+The main principle component of PCA manages to recover the correct
+latent coordinates (with perhaps a horizontal flip). In any case, the
+ordering is correctly found, which should give a very good
+initialisation for the GPLVM.
+
+    % Make sure that atleast 4 lines are below the HR
+    \needspace{4\baselineskip}
+
+    
+        \vspace{6pt}
+        \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-in-prompt}In\hspace{4pt}{[}60{]}:\hspace{4pt}}\\*
+        \vspace{-2.65\baselineskip}
+        \begin{ColorVerbatim}
+            \vspace{-0.7\baselineskip}
+            \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{print}\PY{p}{(}\PY{l+s}{'}\PY{l+s}{Display the first latent coordinate vs. the observed coordinates.}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,} \PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{12}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{)}\PY{p}{,} \PY{n}{dpi}\PY{o}{=}\PY{l+m+mi}{180}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{X}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{Xt}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{X}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{Xt}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{X}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{Xt}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{X}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{X}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s}{'}\PY{l+s}{Display the full latent space}\PY{l+s}{'}\PY{p}{)}
+\end{Verbatim}
+
+            
+                \vspace{-0.2\baselineskip}
+            
+        \end{ColorVerbatim}
+    
+
+    
+
+        % If the first block is an image, minipage the image.  Else
+        % request a certain amount of space for the input text.
+        \needspace{4\baselineskip}
+        
+        
+
+            % Add document contents.
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+\begin{alltt}Display the first latent coordinate vs. the observed coordinates.
+\end{alltt}
+
+            \end{InvisibleVerbatim}
+            
+                \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-out-prompt}Out\hspace{4pt}{[}60{]}:\hspace{4pt}}\\*
+                \vspace{-2.55\baselineskip}\begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+\begin{alltt}<matplotlib.text.Text at 0x8209b50>\end{alltt}
+
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+    \begin{center}
+    \includegraphics[max size={\textwidth}{\textheight}]{easydata_files/easydata_9_2.png}
+    \par
+    \end{center}
+    
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+    \begin{center}
+    \includegraphics[max size={\textwidth}{\textheight}]{easydata_files/easydata_9_3.png}
+    \par
+    \end{center}
+    
+            \end{InvisibleVerbatim}
+            
+        
+    
+We can also find the marginal likelihood of the model:
+
+    % Make sure that atleast 4 lines are below the HR
+    \needspace{4\baselineskip}
+
+    
+        \vspace{6pt}
+        \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-in-prompt}In\hspace{4pt}{[}61{]}:\hspace{4pt}}\\*
+        \vspace{-2.65\baselineskip}
+        \begin{ColorVerbatim}
+            \vspace{-0.7\baselineskip}
+            \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{import} \PY{n+nn}{MLtools}
+\PY{c}{\PYZsh{} Requires optimisation over beta, so maybe later.}
+\end{Verbatim}
+
+            
+                \vspace{-0.2\baselineskip}
+            
+        \end{ColorVerbatim}
+    
+\section{GPy GPLVM results}We now run the GPy Bayesian GPLVM to see if sensible results are
+obtained. Sheffield seem to fix the noise while performing optimisation
+over (presumably) X, ard, Z etc.
+
+    % Make sure that atleast 4 lines are below the HR
+    \needspace{4\baselineskip}
+
+    
+        \vspace{6pt}
+        \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-in-prompt}In\hspace{4pt}{[}62{]}:\hspace{4pt}}\\*
+        \vspace{-2.65\baselineskip}
+        \begin{ColorVerbatim}
+            \vspace{-0.7\baselineskip}
+            \begin{Verbatim}[commandchars=\\\{\}]
+\PY{c}{\PYZsh{} Parameters to adjust}
+\PY{n}{Q} \PY{o}{=} \PY{l+m+mi}{2}
+\PY{n}{num\PYZus{}inducing} \PY{o}{=} \PY{l+m+mi}{10}
+\end{Verbatim}
+
+            
+                \vspace{-0.2\baselineskip}
+            
+        \end{ColorVerbatim}
+    
+
+
+    % Make sure that atleast 4 lines are below the HR
+    \needspace{4\baselineskip}
+
+    
+        \vspace{6pt}
+        \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-in-prompt}In\hspace{4pt}{[}63{]}:\hspace{4pt}}\\*
+        \vspace{-2.65\baselineskip}
+        \begin{ColorVerbatim}
+            \vspace{-0.7\baselineskip}
+            \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{import} \PY{n+nn}{GPy}
+\PY{n}{np}\PY{o}{.}\PY{n}{random}\PY{o}{.}\PY{n}{seed}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}
+
+\PY{c}{\PYZsh{} Normalise data}
+\PY{n}{Yn} \PY{o}{=} \PY{n}{Y} \PY{o}{-} \PY{n}{Y}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}
+\PY{n}{Yn} \PY{o}{/}\PY{o}{=} \PY{n}{Yn}\PY{o}{.}\PY{n}{std}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}
+
+\PY{c}{\PYZsh{} Set up model}
+\PY{n}{rbf\PYZus{}comp} \PY{o}{=} \PY{n}{GPy}\PY{o}{.}\PY{n}{kern}\PY{o}{.}\PY{n}{rbf}\PY{p}{(}\PY{n}{Q}\PY{p}{,} \PY{n}{ARD}\PY{o}{=}\PY{n+nb+bp}{True}\PY{p}{)}
+\PY{n}{kern} \PY{o}{=} \PY{n}{rbf\PYZus{}comp} \PY{o}{+} \PY{n}{GPy}\PY{o}{.}\PY{n}{kern}\PY{o}{.}\PY{n}{bias}\PY{p}{(}\PY{n}{Q}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{o}{-}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{)} \PY{o}{+} \PY{n}{GPy}\PY{o}{.}\PY{n}{kern}\PY{o}{.}\PY{n}{white}\PY{p}{(}\PY{n}{Q}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{o}{-}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{)}
+\PY{n}{m} \PY{o}{=} \PY{n}{GPy}\PY{o}{.}\PY{n}{models}\PY{o}{.}\PY{n}{BayesianGPLVM}\PY{p}{(}\PY{n}{Y}\PY{p}{,} \PY{n}{Q}\PY{p}{,} \PY{n}{kernel}\PY{o}{=}\PY{n}{kern}\PY{p}{,} \PY{n}{num\PYZus{}inducing}\PY{o}{=}\PY{l+m+mi}{10}\PY{p}{)}
+\PY{n}{m}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{.*lengt}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{l+m+mf}{1.}               \PY{c}{\PYZsh{} ???}
+\PY{n}{m}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{noise}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{n}{Yn}\PY{o}{.}\PY{n}{var}\PY{p}{(}\PY{p}{)} \PY{o}{/} \PY{l+m+mi}{100}
+\PY{n}{m}\PY{o}{.}\PY{n}{ensure\PYZus{}default\PYZus{}constraints}\PY{p}{(}\PY{p}{)}
+
+\PY{n}{m}\PY{o}{.}\PY{n}{constrain\PYZus{}fixed}\PY{p}{(}\PY{l+s}{'}\PY{l+s}{noise}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{m}\PY{o}{.}\PY{n}{optimize}\PY{p}{(}\PY{l+s}{'}\PY{l+s}{scg}\PY{l+s}{'}\PY{p}{,} \PY{n}{messages}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{max\PYZus{}f\PYZus{}eval}\PY{o}{=}\PY{l+m+mi}{100}\PY{p}{,} \PY{n}{gtol}\PY{o}{=}\PY{o}{.}\PY{l+m+mo}{05}\PY{p}{)}
+\PY{k}{print} \PY{n}{m}\PY{o}{.}\PY{n}{log\PYZus{}likelihood}\PY{p}{(}\PY{p}{)}
+\PY{n}{m}\PY{o}{.}\PY{n}{constrain\PYZus{}positive}\PY{p}{(}\PY{l+s}{'}\PY{l+s}{noise}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{m}\PY{o}{.}\PY{n}{optimize}\PY{p}{(}\PY{l+s}{'}\PY{l+s}{scg}\PY{l+s}{'}\PY{p}{,} \PY{n}{messages}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{max\PYZus{}f\PYZus{}eval}\PY{o}{=}\PY{l+m+mi}{50}\PY{p}{,} \PY{n}{gtol}\PY{o}{=}\PY{o}{.}\PY{l+m+mo}{05}\PY{p}{)}
+\PY{k}{print} \PY{n}{m}\PY{o}{.}\PY{n}{log\PYZus{}likelihood}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+            
+                \vspace{-0.2\baselineskip}
+            
+        \end{ColorVerbatim}
+    
+
+    
+
+        % If the first block is an image, minipage the image.  Else
+        % request a certain amount of space for the input text.
+        \needspace{4\baselineskip}
+        
+        
+
+            % Add document contents.
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+\begin{alltt}Y is not zero mean, centering it locally (GPy.util.linalg.PCA)
+Warning: re-constraining these parameters
+noise\_variance
+ I      F              Scale          |g|
+ 0001   1.174933e+04   1.000000e+00   1.298781e+08  0002
+8.510244e+03   5.000000e-01   9.630844e+06  0003   5.237181e+03
+2.500000e-01   1.953195e+06  0004   2.763031e+03   1.250000e-01
+4.560727e+05  0005   2.231165e+03   6.250000e-02   9.662234e+04  0006
+1.877544e+03   3.125000e-02   6.718029e+04  0007   1.691982e+03
+1.562500e-02   4.705385e+04  0008   1.189139e+03   7.812500e-03
+2.267972e+04  0009   1.090526e+03   3.906250e-03   5.912366e+04  0010
+1.019498e+03   1.953125e-03   9.675996e+03  0011   8.173122e+02
+9.765625e-04   4.087968e+03  0012   7.818935e+02   4.882812e-04
+6.351934e+03  0013   7.049787e+02   2.441406e-04   1.354300e+03  0014
+6.720841e+02   1.220703e-04   2.297052e+03  0015   6.520418e+02
+6.103516e-05   1.029606e+03  0016   6.346825e+02   3.051758e-05
+1.542317e+03  0017   6.205158e+02   1.525879e-05   8.401982e+02  0018
+6.076508e+02   7.629395e-06   1.301209e+03  0019   5.957174e+02
+3.814697e-06   6.935461e+02  0020   5.842914e+02   1.907349e-06
+1.280522e+03  0021   5.735990e+02   9.536743e-07   5.925474e+02  0022
+5.631451e+02   4.768372e-07   1.250134e+03  0023   5.535387e+02
+2.384186e-07   5.209937e+02  0024   5.441374e+02   1.192093e-07
+1.167765e+03  0025   5.355547e+02   5.960464e-08   4.693805e+02  0026
+5.271719e+02   2.980232e-08   1.067871e+03  0027   5.193209e+02
+1.490116e-08   4.217984e+02  0028   5.116299e+02   7.450581e-09
+1.020822e+03  0029   5.044355e+02   3.725290e-09   3.826234e+02  0030
+4.973630e+02   1.862645e-09   9.761591e+02  0031   4.908192e+02
+9.313226e-10   3.516363e+02  0032   4.843352e+02   4.656613e-10
+9.260817e+02  0033   4.784200e+02   2.328306e-10   3.269997e+02  0034
+4.725837e+02   1.164153e-10   8.512031e+02  0035   4.673215e+02
+5.820766e-11   3.099890e+02  0036   4.621396e+02   2.910383e-11
+7.615319e+02  0037   4.574083e+02   1.455192e-11   2.948496e+02  0038
+4.527497e+02   7.275958e-12   6.912431e+02  0039   4.484305e+02
+3.637979e-12   2.795322e+02  0040   4.441511e+02   1.818989e-12
+6.482094e+02  0041   4.402076e+02   9.094947e-13   2.666168e+02  0042
+4.363096e+02   4.547474e-13   5.971419e+02  0043   4.327213e+02
+2.273737e-13   2.567749e+02  0044   4.291861e+02   1.136868e-13
+5.432539e+02  0045   4.259268e+02   5.684342e-14   2.498691e+02  0046
+4.227272e+02   2.842171e-14   4.886610e+02  0047   4.197307e+02
+1.421085e-14   2.423644e+02  0048   4.167954e+02   7.105427e-15
+4.482699e+02  0049   4.140479e+02   3.552714e-15   2.378178e+02  0050
+4.113469e+02   1.776357e-15   4.110117e+02  0051   4.088007e+02
+8.881784e-16   2.321850e+02  0052   4.063028e+02   4.440892e-16
+3.789586e+02  0053   4.039352e+02   2.220446e-16   2.269751e+02  0054
+4.016158e+02   1.110223e-16   3.517152e+02  0055   3.994100e+02
+5.551115e-17   2.221002e+02  0056   3.972495e+02   2.775558e-17
+3.296582e+02  0057   3.951882e+02   1.387779e-17   2.158140e+02  0058
+3.931732e+02   6.938894e-18   3.132113e+02  0059   3.912533e+02
+3.469447e-18   2.099576e+02  0060   3.893824e+02   1.734723e-18
+2.976827e+02  0061   3.875997e+02   8.673617e-19   2.048292e+02  0062
+3.858605e+02   4.336809e-19   2.852357e+02  0063   3.841947e+02
+2.168404e-19   1.982345e+02  0064   3.825630e+02   1.084202e-19
+2.774875e+02  0065   3.809901e+02   5.421011e-20   1.905933e+02  0066
+3.794469e+02   2.710505e-20   2.701763e+02  0067   3.779492e+02
+1.355253e-20   1.829693e+02  0068   3.764740e+02   6.776264e-21
+2.665296e+02  0069   3.750419e+02   3.388132e-21   1.762272e+02  0070
+3.736287e+02   1.694066e-21   2.614184e+02  0071   3.722527e+02
+8.470329e-22   1.692279e+02  0072   3.708918e+02   4.235165e-22
+2.584774e+02  0073   3.695625e+02   2.117582e-22   1.615718e+02  0074
+3.682476e+02   1.058791e-22   2.568330e+02  0075   3.669639e+02
+5.293956e-23   1.549819e+02  0076   3.656925e+02   2.646978e-23
+2.548263e+02  0077   3.644507e+02   1.323489e-23   1.486778e+02  0078
+3.632199e+02   6.617445e-24   2.529492e+02  0079   3.620155e+02
+3.308722e-24   1.424502e+02  0080   3.608177e+02   1.654361e-24
+2.536346e+02  0081   3.596465e+02   8.271806e-25   1.363869e+02  0082
+3.584832e+02   4.135903e-25   2.525861e+02  0083   3.573450e+02
+2.067952e-25   1.309668e+02  0084   3.562147e+02   1.033976e-25
+2.513823e+02  0085   3.551070e+02   5.169879e-26   1.258113e+02  0086
+3.540057e+02   2.584939e-26   2.511799e+02  0087   3.529255e+02
+1.292470e-26   1.207975e+02  0088   3.518473e+02   6.462349e-27
+2.529810e+02  0089   3.507899e+02   3.231174e-27   1.157883e+02  0090
+3.497362e+02   1.615587e-27   2.534917e+02  0091   3.487034e+02
+8.077936e-28   1.113576e+02  0092   3.476741e+02   4.038968e-28
+2.535066e+02  0093   3.466651e+02   2.019484e-28   1.072111e+02  0094
+3.456569e+02   1.009742e-28   2.544931e+02  0095   3.446694e+02
+5.048710e-29   1.031857e+02  0096   3.436812e+02   2.524355e-29
+2.554610e+02  0097   3.427084e+02   1.262177e-29   9.899800e+01  0098
+3.417366e+02   6.310887e-30   2.575918e+02  0098   3.417366e+02
+3.155444e-30   9.524294e+01
+-341.736608333
+Warning: re-constraining these parameters
+noise\_variance
+ I      F              Scale          |g|
+ 0001   3.308121e+02   1.000000e+00   3.848568e+03  0002
+3.294127e+02   5.000000e-01   1.677208e+02  0003   3.281057e+02
+2.500000e-01   1.816257e+02  0004   3.268982e+02   1.250000e-01
+1.985234e+02  0005   3.256702e+02   6.250000e-02   1.286248e+02  0006
+3.244673e+02   3.125000e-02   2.341516e+02  0007   3.230594e+02
+1.562500e-02   9.514105e+01  0008   3.216197e+02   7.812500e-03
+3.380565e+02  0009   3.193485e+02   3.906250e-03   7.212349e+01  0010
+3.169905e+02   1.953125e-03   6.597005e+02  0011   3.044907e+02
+9.765625e-04   5.268098e+01  0012   2.977472e+02   9.765625e-04
+2.379833e+03  0013   2.970431e+02   4.882812e-04   9.812382e+01  0014
+2.964119e+02   2.441406e-04   8.062892e+01  0015   2.958579e+02
+1.220703e-04   9.498714e+01  0016   2.953221e+02   6.103516e-05
+5.650727e+01  0017   2.948218e+02   3.051758e-05   1.136131e+02  0018
+2.943218e+02   1.525879e-05   4.226404e+01  0019   2.938390e+02
+7.629395e-06   1.309860e+02  0020   2.933192e+02   3.814697e-06
+3.409743e+01  0021   2.928236e+02   1.907349e-06   1.435280e+02  0022
+2.923247e+02   9.536743e-07   2.874499e+01  0023   2.918306e+02
+4.768372e-07   1.507646e+02  0024   2.913021e+02   2.384186e-07
+2.407615e+01  0025   2.907958e+02   1.192093e-07   1.620948e+02  0026
+2.902300e+02   5.960464e-08   2.036665e+01  0027   2.896641e+02
+2.980232e-08   1.917216e+02  0028   2.889716e+02   1.490116e-08
+1.716894e+01  0029   2.882168e+02   7.450581e-09   2.742414e+02  0030
+2.869010e+02   3.725290e-09   1.423708e+01  0031   2.857577e+02
+1.862645e-09   4.576162e+02  0032   2.812669e+02   9.313226e-10
+1.166612e+01  0033   2.789885e+02   4.656613e-10   5.410575e+02  0034
+2.788599e+02   2.328306e-10   3.759074e+01  0035   2.787696e+02
+1.164153e-10   1.591055e+01  0036   2.786810e+02   5.820766e-11
+2.596733e+01  0037   2.785938e+02   2.910383e-11   1.582399e+01  0038
+2.785069e+02   1.455192e-11   2.562052e+01  0039   2.784209e+02
+7.275958e-12   1.568173e+01  0040   2.783351e+02   3.637979e-12
+2.550357e+01  0041   2.782503e+02   1.818989e-12   1.556529e+01  0042
+2.781655e+02   9.094947e-13   2.545256e+01  0043   2.780813e+02
+4.547474e-13   1.535089e+01  0044   2.779976e+02   2.273737e-13
+2.522939e+01  0045   2.779146e+02   1.136868e-13   1.530872e+01  0046
+2.779146e+02   5.684342e-14   2.488127e+01  0047   2.779146e+02
+2.273737e-13   2.488127e+01  0048   2.779146e+02   9.094947e-13
+2.488127e+01  0048   2.779146e+02   3.637979e-12   2.488127e+01
+-277.914632628
+\end{alltt}
+
+            \end{InvisibleVerbatim}
+            
+        
+    
+
+
+    % Make sure that atleast 4 lines are below the HR
+    \needspace{4\baselineskip}
+
+    
+        \vspace{6pt}
+        \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-in-prompt}In\hspace{4pt}{[}64{]}:\hspace{4pt}}\\*
+        \vspace{-2.65\baselineskip}
+        \begin{ColorVerbatim}
+            \vspace{-0.7\baselineskip}
+            \begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,} \PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{12}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{)}\PY{p}{,} \PY{n}{dpi}\PY{o}{=}\PY{l+m+mi}{180}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{m}\PY{o}{.}\PY{n}{X}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s}{'}\PY{l+s}{GPy}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{X}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s}{'}\PY{l+s}{PCA}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{Xt}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s}{'}\PY{l+s}{init}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{n}{loc}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{)}
+
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{m}\PY{o}{.}\PY{n}{X}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s}{'}\PY{l+s}{GPy}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{X}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s}{'}\PY{l+s}{PCA}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{Xt}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s}{'}\PY{l+s}{init}\PY{l+s}{'}\PY{p}{)}
+
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{m}\PY{o}{.}\PY{n}{X}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s}{'}\PY{l+s}{GPy}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{X}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s}{'}\PY{l+s}{PCA}\PY{l+s}{'}\PY{p}{)}
+\PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{Xt}\PY{p}{,} \PY{n}{Y}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{x}\PY{l+s}{'}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s}{'}\PY{l+s}{init}\PY{l+s}{'}\PY{p}{)}
+
+\PY{c}{\PYZsh{}fig, (latent\PYZus{}axes, sense\PYZus{}axes) = plt.subplots(1, 2)}
+\PY{c}{\PYZsh{}plt.sca(latent\PYZus{}axes)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+\PY{n}{m}\PY{o}{.}\PY{n}{plot\PYZus{}latent}\PY{p}{(}\PY{p}{)}
+
+\PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+
+\PY{n}{kern}\PY{o}{.}\PY{n}{plot\PYZus{}ARD}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+            
+                \vspace{-0.2\baselineskip}
+            
+        \end{ColorVerbatim}
+    
+
+    
+
+        % If the first block is an image, minipage the image.  Else
+        % request a certain amount of space for the input text.
+        \needspace{4\baselineskip}
+        
+        
+
+            % Add document contents.
+            
+                \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-out-prompt}Out\hspace{4pt}{[}64{]}:\hspace{4pt}}\\*
+                \vspace{-2.55\baselineskip}\begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+\begin{alltt}<matplotlib.axes.AxesSubplot at 0x9a95b50>\end{alltt}
+
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+    \begin{center}
+    \includegraphics[max size={\textwidth}{\textheight}]{easydata_files/easydata_16_1.png}
+    \par
+    \end{center}
+    
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+    \begin{center}
+    \includegraphics[max size={\textwidth}{\textheight}]{easydata_files/easydata_16_2.png}
+    \par
+    \end{center}
+    
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+\begin{alltt}<matplotlib.figure.Figure at 0x974f6d0>\end{alltt}
+
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+    \begin{center}
+    \includegraphics[max size={\textwidth}{\textheight}]{easydata_files/easydata_16_4.png}
+    \par
+    \end{center}
+    
+            \end{InvisibleVerbatim}
+            
+        
+    
+\section{Parallel GPLVM results}This is a bit more difficult, as we need to copy the input data to a
+bunch of files.
+
+    % Make sure that atleast 4 lines are below the HR
+    \needspace{4\baselineskip}
+
+    
+        \vspace{6pt}
+        \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-in-prompt}In\hspace{4pt}{[}65{]}:\hspace{4pt}}\\*
+        \vspace{-2.65\baselineskip}
+        \begin{ColorVerbatim}
+            \vspace{-0.7\baselineskip}
+            \begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{P} \PY{o}{=} \PY{l+m+mi}{4}
+\PY{n}{path} \PY{o}{=} \PY{l+s}{'}\PY{l+s}{../easydata/}\PY{l+s}{'}
+
+\PY{c}{\PYZsh{} First delete all current inputs & embeddings}
+\PY{n}{filelist} \PY{o}{=} \PY{n}{glob}\PY{o}{.}\PY{n}{glob}\PY{p}{(}\PY{n}{path} \PY{o}{+} \PY{l+s}{"}\PY{l+s}{/inputs/*}\PY{l+s}{"}\PY{p}{)}
+\PY{n}{filelist}\PY{o}{.}\PY{n}{extend}\PY{p}{(}\PY{n}{glob}\PY{o}{.}\PY{n}{glob}\PY{p}{(}\PY{n}{path} \PY{o}{+} \PY{l+s}{"}\PY{l+s}{/embeddings/*}\PY{l+s}{"}\PY{p}{)}\PY{p}{)}
+\PY{k}{for} \PY{n}{f} \PY{o+ow}{in} \PY{n}{filelist}\PY{p}{:}
+    \PY{n}{os}\PY{o}{.}\PY{n}{remove}\PY{p}{(}\PY{n}{f}\PY{p}{)}
+
+\PY{c}{\PYZsh{} Open files for writing the divided dataset into}
+\PY{n}{f} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+\PY{k}{for} \PY{n}{p} \PY{o+ow}{in} \PY{n+nb}{xrange}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{P} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{:}
+    \PY{n}{name} \PY{o}{=} \PY{n}{path} \PY{o}{+} \PY{l+s}{'}\PY{l+s}{inputs/easy\PYZus{}}\PY{l+s}{'} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+    \PY{n}{f}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n+nb}{open}\PY{p}{(}\PY{n}{name}\PY{p}{,} \PY{l+s}{'}\PY{l+s}{w}\PY{l+s}{'}\PY{p}{)}\PY{p}{)}
+
+\PY{c}{\PYZsh{} Divide up dataset}
+\PY{k}{for} \PY{n}{y} \PY{o+ow}{in} \PY{n}{Y}\PY{p}{:}
+    \PY{n}{x\PYZus{}str} \PY{o}{=} \PY{l+s}{"}\PY{l+s}{,}\PY{l+s}{"}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{char}\PY{o}{.}\PY{n}{mod}\PY{p}{(}\PY{l+s}{'}\PY{l+s+si}{\PYZpc{}f}\PY{l+s}{'}\PY{p}{,} \PY{n}{y}\PY{p}{)}\PY{p}{)}
+    \PY{n}{randf} \PY{o}{=} \PY{n}{random}\PY{o}{.}\PY{n}{choice}\PY{p}{(}\PY{n}{f}\PY{p}{)}
+    \PY{n}{randf}\PY{o}{.}\PY{n}{write}\PY{p}{(}\PY{n}{x\PYZus{}str}\PY{p}{)}
+    \PY{n}{randf}\PY{o}{.}\PY{n}{write}\PY{p}{(}\PY{l+s}{'}\PY{l+s+se}{\PYZbs{}n}\PY{l+s}{'}\PY{p}{)}    
+    
+\PY{k}{for} \PY{n}{fi} \PY{o+ow}{in} \PY{n}{f}\PY{p}{:}
+    \PY{n}{fi}\PY{o}{.}\PY{n}{close}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+            
+                \vspace{-0.2\baselineskip}
+            
+        \end{ColorVerbatim}
+    
+Now set up the options and call the actual script.
+
+    % Make sure that atleast 4 lines are below the HR
+    \needspace{4\baselineskip}
+
+    
+        \vspace{6pt}
+        \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-in-prompt}In\hspace{4pt}{[}70{]}:\hspace{4pt}}\\*
+        \vspace{-2.65\baselineskip}
+        \begin{ColorVerbatim}
+            \vspace{-0.7\baselineskip}
+            \begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{options} \PY{o}{=} \PY{p}{\PYZob{}}\PY{p}{\PYZcb{}}
+\PY{n}{options}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{input}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{n}{path} \PY{o}{+} \PY{l+s}{'}\PY{l+s}{/inputs/}\PY{l+s}{'}
+\PY{n}{options}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{embeddings}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{n}{path} \PY{o}{+} \PY{l+s}{'}\PY{l+s}{/embeddings/}\PY{l+s}{'}
+\PY{n}{options}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{parallel}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{l+s}{'}\PY{l+s}{local}\PY{l+s}{'}
+\PY{n}{options}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{iterations}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{10}
+\PY{n}{options}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{statistics}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{n}{path} \PY{o}{+} \PY{l+s}{'}\PY{l+s}{/tmp}\PY{l+s}{'}
+\PY{n}{options}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{tmp}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{n}{path} \PY{o}{+} \PY{l+s}{'}\PY{l+s}{/tmp}\PY{l+s}{'}
+\PY{n}{options}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{M}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{n}{num\PYZus{}inducing}
+\PY{n}{options}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{Q}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{n}{Q}
+\PY{n}{options}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{D}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{3}
+\PY{n}{options}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{fixed\PYZus{}embeddings}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{n+nb+bp}{False}
+\PY{n}{options}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{keep}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{n+nb+bp}{True}
+\PY{n}{options}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{load}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{n+nb+bp}{False}
+\PY{n}{options}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{fixed\PYZus{}beta}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{n+nb+bp}{False}
+\PY{n}{options}\PY{p}{[}\PY{l+s}{'}\PY{l+s}{init}\PY{l+s}{'}\PY{p}{]} \PY{o}{=} \PY{l+s}{'}\PY{l+s}{PCA}\PY{l+s}{'}
+
+\PY{c}{\PYZsh{}filelist = (glob.glob(path + "/embeddings/*"))}
+\PY{c}{\PYZsh{}for f in filelist:}
+\PY{c}{\PYZsh{}    os.remove(f)}
+
+\PY{k+kn}{import} \PY{n+nn}{parallel\PYZus{}GPLVM}
+\PY{n}{parallel\PYZus{}GPLVM}\PY{o}{.}\PY{n}{main}\PY{p}{(}\PY{n}{options}\PY{p}{)}
+\end{Verbatim}
+
+            
+                \vspace{-0.2\baselineskip}
+            
+        \end{ColorVerbatim}
+    
+
+    
+
+        % If the first block is an image, minipage the image.  Else
+        % request a certain amount of space for the input text.
+        \needspace{4\baselineskip}
+        
+        
+
+            % Add document contents.
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+\begin{alltt}Creating ../easydata//embeddings//easy\_1.embedding.npy with 24 points
+Creating ../easydata//embeddings//easy\_1.variance.npy with 24 points
+Creating ../easydata//embeddings//easy\_2.embedding.npy with 30 points
+Creating ../easydata//embeddings//easy\_2.variance.npy with 30 points
+Creating ../easydata//embeddings//easy\_3.embedding.npy with 23 points
+Creating ../easydata//embeddings//easy\_3.variance.npy with 23 points
+Creating ../easydata//embeddings//easy\_4.embedding.npy with 23 points
+Creating ../easydata//embeddings//easy\_4.variance.npy with 23 points
+Dispatching statistics Map-Reduce\ldots
+Done! statistics Map-Reduce took  0  seconds
+Calculating global statistics\ldots
+Done! global statistics took  0  seconds
+ I    F              Scale          |g|
+Starting optimisation for 10 iterations
+Dispatching statistics Map-Reduce\ldots
+Done! statistics Map-Reduce took  0  seconds
+Calculating global statistics\ldots
+Done! global statistics took  0  seconds
+Dispatching statistics Map-Reduce\ldots
+Done! statistics Map-Reduce took  0  seconds
+Calculating global statistics\ldots
+Done! global statistics took  0  seconds
+
+ 01   1.553467e+03   1.000000e+00   8.230386e+06
+
+Calling local optimisation\ldots
+Dispatching embeddings Map-Reduce to run in background\ldots
+Waiting for embeddings Map-Reduce to finish\ldots
+Done! embeddings Map-Reduce took  0  seconds
+Dispatching statistics Map-Reduce\ldots
+Done! statistics Map-Reduce took  0  seconds
+Calculating global statistics\ldots
+Done! global statistics took  0  seconds
+Dispatching statistics Map-Reduce\ldots
+Done! statistics Map-Reduce took  0  seconds
+Calculating global statistics\ldots
+Done! global statistics took  0  seconds
+
+ 02   1.537431e+03   4.000000e+00   2.585053e+06
+
+Calling local optimisation\ldots
+Dispatching embeddings Map-Reduce to run in background\ldots
+Waiting for embeddings Map-Reduce to finish\ldots
+Done! embeddings Map-Reduce took  0  seconds
+Dispatching statistics Map-Reduce\ldots
+Done! statistics Map-Reduce took  0  seconds
+Calculating global statistics\ldots
+Done! global statistics took  0  seconds
+Dispatching statistics Map-Reduce\ldots
+Done! statistics Map-Reduce took  0  seconds
+Calculating global statistics\ldots
+Done! global statistics took  0  seconds
+
+ 03   1.521132e+03   2.000000e+00   2.563256e+06
+
+ 03   1.521132e+03   2.000000e+00   2.563256e+06
+
+Final global\_statistics
+\{'alpha': array([[ 0.9968579,  0.9963545]]), 'beta': array([[
+1.96194126]]), 'Z': array([[ 0.3315234 , -0.83912678],
+       [-0.88165158,  0.20712083],
+       [-0.28739926, -0.8759714 ],
+       [-2.29176749,  2.10228504],
+       [ 1.50356233,  0.76280535],
+       [-0.30459867, -0.54154114],
+       [-1.75789666,  1.96844668],
+       [ 0.23797668, -0.74670968],
+       [ 0.96231138, -0.13567684],
+       [-1.04163384,  0.59424671]]), 'sf2': array([[ 0.95894112]])\}
+Dispatching statistics Map-Reduce\ldots
+Done! statistics Map-Reduce took  0  seconds
+Calculating global statistics\ldots
+Done! global statistics took  0  seconds
+final F=-1521.13183714
+\end{alltt}
+
+            \end{InvisibleVerbatim}
+            
+        
+    
+
+
+    % Make sure that atleast 4 lines are below the HR
+    \needspace{4\baselineskip}
+
+    
+        \vspace{6pt}
+        \makebox[0.1\linewidth]{\smaller\hfill\tt\color{nbframe-in-prompt}In\hspace{4pt}{[}75{]}:\hspace{4pt}}\\*
+        \vspace{-2.65\baselineskip}
+        \begin{ColorVerbatim}
+            \vspace{-0.7\baselineskip}
+            \begin{Verbatim}[commandchars=\\\{\}]
+\PY{n+nb}{reload}\PY{p}{(}\PY{n}{show\PYZus{}embeddings}\PY{p}{)}
+\PY{k+kn}{import} \PY{n+nn}{show\PYZus{}embeddings}
+\PY{k}{class} \PY{n+nc}{empty}\PY{p}{:}
+    \PY{k}{pass}
+\PY{n}{disp\PYZus{}opt} \PY{o}{=} \PY{n}{empty}\PY{p}{(}\PY{p}{)}
+\PY{n}{disp\PYZus{}opt}\PY{o}{.}\PY{n}{verbose} \PY{o}{=} \PY{n+nb+bp}{True}
+\PY{n}{disp\PYZus{}opt}\PY{o}{.}\PY{n}{dimension} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}
+\PY{n}{disp\PYZus{}opt}\PY{o}{.}\PY{n}{output\PYZus{}dimension} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{]}
+\PY{n}{disp\PYZus{}opt}\PY{o}{.}\PY{n}{plot2d} \PY{o}{=} \PY{n+nb+bp}{True}
+\PY{n}{disp\PYZus{}opt}\PY{o}{.}\PY{n}{plot3d} \PY{o}{=} \PY{n+nb+bp}{False}
+\PY{n}{args} \PY{o}{=} \PY{p}{[}\PY{n}{path}\PY{p}{]}
+\PY{n}{show\PYZus{}embeddings}\PY{o}{.}\PY{n}{run}\PY{p}{(}\PY{n}{disp\PYZus{}opt}\PY{p}{,} \PY{n}{args}\PY{p}{)}
+\end{Verbatim}
+
+            
+                \vspace{-0.2\baselineskip}
+            
+        \end{ColorVerbatim}
+    
+
+    
+
+        % If the first block is an image, minipage the image.  Else
+        % request a certain amount of space for the input text.
+        \needspace{4\baselineskip}
+        
+        
+
+            % Add document contents.
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+\begin{alltt}Displaying X in '../easydata/'\ldots
+alpha: [ 0.9968579  0.9963545]
+beta : 1.96194126426
+sf2  : 0.958941121247
+\end{alltt}
+
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+    \begin{center}
+    \includegraphics[max size={\textwidth}{\textheight}]{easydata_files/easydata_22_1.png}
+    \par
+    \end{center}
+    
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+    \begin{center}
+    \includegraphics[max size={\textwidth}{\textheight}]{easydata_files/easydata_22_2.png}
+    \par
+    \end{center}
+    
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+    \begin{center}
+    \includegraphics[max size={\textwidth}{\textheight}]{easydata_files/easydata_22_3.png}
+    \par
+    \end{center}
+    
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+    \begin{center}
+    \includegraphics[max size={\textwidth}{\textheight}]{easydata_files/easydata_22_4.png}
+    \par
+    \end{center}
+    
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+    \begin{center}
+    \includegraphics[max size={\textwidth}{\textheight}]{easydata_files/easydata_22_5.png}
+    \par
+    \end{center}
+    
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+    \begin{center}
+    \includegraphics[max size={\textwidth}{\textheight}]{easydata_files/easydata_22_6.png}
+    \par
+    \end{center}
+    
+            \end{InvisibleVerbatim}
+            
+                \begin{InvisibleVerbatim}
+                \vspace{-0.5\baselineskip}
+    \begin{center}
+    \includegraphics[max size={\textwidth}{\textheight}]{easydata_files/easydata_22_7.png}
+    \par
+    \end{center}
+    
+            \end{InvisibleVerbatim}
+            
+        
+    
+
+        
+
+        \renewcommand{\indexname}{Index}
+        \printindex
+
+    % End of document
+    \end{document}
+
+
