@@ -34,7 +34,7 @@ For the moment we're importing this directly over here in order to use its suppo
 This should be refactored to be passed as a class object from the main function.
 '''
 import local_MapReduce
-debug = True
+debug = False
 
 def print_out(len_maxiters, display, fnow, current_grad, beta, iteration):
     if display:

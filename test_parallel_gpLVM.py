@@ -44,6 +44,7 @@ parallel_GPLVM.main(options)
 
 options['load'] = True
 options['fixed_beta'] = False
-parallel_GPLVM.main(options)
+for i in xrange(100):
+	parallel_GPLVM.main(options)
 
 show_embeddings.run(disp_opt, args)

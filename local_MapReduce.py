@@ -116,25 +116,25 @@ def statistics_MR(options):
     input_files = glob.glob(options['input'] + '/*')
     # Send both input_file_name and options to each mapper
     arguments = zip(input_files,itertools.repeat(options))
-    #pool = multiprocessing.Pool(len(input_files))
-    #map_responses = pool.map(statistics_mapper, arguments)
-    #pool.close()
-    #pool.join()
+    pool = multiprocessing.Pool(len(input_files))
+    map_responses = pool.map(statistics_mapper, arguments)
+    pool.close()
+    pool.join()
     # Code to debug locally because the trace from within the pool is not informative
-    map_responses = []
-    for arg in arguments:
-        map_responses.append(statistics_mapper(arg))
+    #map_responses = []
+    #for arg in arguments:
+    #    map_responses.append(statistics_mapper(arg))
     
     partitioned_data = partition(itertools.chain(*map_responses))
     
     arguments = zip(partitioned_data,itertools.repeat(options))
-    #pool = multiprocessing.Pool(len(input_files))
-    #reduced_values = pool.map(statistics_reducer, arguments)
-    #pool.close()
-    #pool.join()
-    reduced_values = []
-    for arg in arguments:
-        reduced_values.append(statistics_reducer(arg))
+    pool = multiprocessing.Pool(len(input_files))
+    reduced_values = pool.map(statistics_reducer, arguments)
+    pool.close()
+    pool.join()
+    #reduced_values = []
+    #for arg in arguments:
+    #    reduced_values.append(statistics_reducer(arg))
     
     return reduced_values
 
@@ -247,13 +247,13 @@ def embeddings_MR(options):
     input_files = glob.glob(options['input'] + '/*')
     # Send options to each mapper
     arguments = zip(input_files,itertools.repeat(options))
-    #pool = multiprocessing.Pool(len(input_files))
-    #pool.map(embeddings_mapper, arguments)
-    #pool.close()
-    #pool.join()
+    pool = multiprocessing.Pool(len(input_files))
+    pool.map(embeddings_mapper, arguments)
+    pool.close()
+    pool.join()
     # Code to debug locally because the trace from within the pool is not informative
-    for arg in arguments:
-        embeddings_mapper(arg)
+    #for arg in arguments:
+    #    embeddings_mapper(arg)
     
 def embeddings_mapper((input_file_name, options)):
     global_statistics = {}
