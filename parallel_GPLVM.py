@@ -59,6 +59,7 @@ import glob
 import partial_terms as pt
 import scg_adapted
 from scg_adapted import SCG_adapted
+import supporting_functions as sp
 
 options = {}
 map_reduce = {}
@@ -85,14 +86,13 @@ def main(opt_param = None):
     # Run the optimiser for T steps
     x0 = flatten_global_statistics(options, global_statistics)
     # Transform the positiv parameters to be in the range (-Inf, Inf)
-    x0 = numpy.array([transform_back(b, x) for b, x in zip(options['flat_global_statistics_bounds'], x0)])
+    x0 = numpy.array([sp.transform_back(b, x) for b, x in zip(options['flat_global_statistics_bounds'], x0)])
     # Todo: Nothing seems to be done with the end result of the global optimisation?
-    x_opt = SCG_adapted(likelihood_and_gradient, local_optimisation, x0,
-        display=True, maxiters=options['iterations'])
+    x_opt = SCG_adapted(likelihood_and_gradient, x0, options['embeddings'], display=True, maxiters=options['iterations'])
     
     flat_array = x_opt[0]
     # Transform the parameters that have to be positive to be positive
-    flat_array_transformed = numpy.array([transform(b, x) for b, x in 
+    flat_array_transformed = numpy.array([sp.transform(b, x) for b, x in 
         zip(options['flat_global_statistics_bounds'], flat_array)])
     global_statistics = rebuild_global_statistics(options, flat_array_transformed)
     print 'Final global_statistics'
@@ -160,7 +160,7 @@ def init_statistics(map_reduce, options):
             'Z' : Z, # see GPy models/bayesian_gplvm.py
             'sf2' : numpy.array([[1.0]]), # see GPy kern/rbf.py
             'alpha' : scipy.ones((1, options['Q'])), # see GPy kern/rbf.py
-            'beta' : numpy.array([[2.0]]) # see GPy likelihood/gaussian.py
+            'beta' : numpy.array([[1.0]]) # see GPy likelihood/gaussian.py
         }
     else:
         # Load global statistics from previous run
@@ -189,14 +189,15 @@ def init_statistics(map_reduce, options):
 Calculate the likelihood and derivatives by sending jobs to the nodes
 '''
 
-def likelihood_and_gradient(flat_array, iteration):
+def likelihood_and_gradient(flat_array, iteration, step_size=0):
     global options, map_reduce
-    flat_array_transformed = numpy.array([transform(b, x) for b, x in 
+    flat_array_transformed = numpy.array([sp.transform(b, x) for b, x in 
         zip(options['flat_global_statistics_bounds'], flat_array)])
     global_statistics = rebuild_global_statistics(options, flat_array_transformed)
     options['i'] = iteration
-    #print 'global_statistics'
-    #print global_statistics
+    options['step_size'] = step_size
+    print 'global_statistics'
+    print global_statistics
 
     # Clear unneeded files from previous iteration if we don't want to keep them. 
     clean(options)
@@ -207,7 +208,6 @@ def likelihood_and_gradient(flat_array, iteration):
         map_reduce.save(file_name, global_statistics[key])
 
     # Dispatch statistics Map-Reduce
-    #print "Dispatching statistics Map-Reduce..."
     start = time.time()
     # Cache matrices that only need be calculated once
     map_reduce.cache(options, global_statistics)
@@ -216,7 +216,6 @@ def likelihood_and_gradient(flat_array, iteration):
     print "Done! statistics Map-Reduce took ", int(end - start), " seconds"
 
     # Calculate global statistics
-    #print "Calculating global statistics..."
     start = time.time()
     partial_derivatives, accumulated_statistics, partial_terms = calculate_global_statistics(options,
         global_statistics, accumulated_statistics_files, map_reduce)
@@ -229,32 +228,16 @@ def likelihood_and_gradient(flat_array, iteration):
     gradient = flatten_global_statistics(options, gradient)
     likelihood = partial_derivatives['F']
 
-    gradient = numpy.array([g * transform_grad(b, x) for b, x, g in 
-        zip(options['flat_global_statistics_bounds'], flat_array, gradient)])
-    return -1 * likelihood, -1 * gradient
-
-
-def local_optimisation(flat_array):
     if not options['fixed_embeddings']:
-        flat_array_transformed = numpy.array([transform(b, x) for b, x in 
-            zip(options['flat_global_statistics_bounds'], flat_array)])
-        global_statistics = rebuild_global_statistics(options, flat_array_transformed)
-    
-        # Save into shared files so all node can access them
-        for key in global_statistics.keys():
-            file_name = options['statistics'] + '/global_statistics_' + key + '_' + str(options['i']) + '.npy'
-            map_reduce.save(file_name, global_statistics[key])
-
-        # Dispatch embeddings Map-Reduce to run in background if we're not using fixed embeddings
-        #print "Dispatching embeddings Map-Reduce to run in background..."
+        # Dispatch embeddings Map-Reduce if we're not using fixed embeddings
         start = time.time()
-        script_files = map_reduce.embeddings_MR(options)
-
-        # Wait for embeddings Map-Reduce to finish if we're not using fixed embeddings
-        #print "Waiting for embeddings Map-Reduce to finish..."
-        map_reduce.embeddings_watcher(options, script_files)
+        map_reduce.embeddings_MR(options)
         end = time.time()
         print "Done! embeddings Map-Reduce took ", int(end - start), " seconds"
+
+    gradient = numpy.array([g * sp.transform_grad(b, x) for b, x, g in 
+        zip(options['flat_global_statistics_bounds'], flat_array, gradient)])
+    return -1 * likelihood, -1 * gradient
 
 
 '''
@@ -276,45 +259,6 @@ def rebuild_global_statistics(options, flat_array):
         start = start + size
     return global_statistics
 
-
-lim_val = -numpy.log(sys.float_info.epsilon) 
-# Transform a parameter to be in (0, inf) if the bound constrains it to be positive 
-def transform(b, x):
-    if b == (0, None):
-        if x > lim_val:
-            return x
-        elif x < -lim_val:
-            return numpy.log(1 + numpy.exp(-lim_val))
-        else:
-            return numpy.log(1 + numpy.exp(x))
-    elif b == (None, None):
-        return x
-
-# Transform a parameter back to be in (-inf, inf) if the bound constrains it to be positive 
-def transform_back(b, x):
-    if b == (0, None):
-        if x > lim_val:
-            return x
-        elif x < -lim_val:
-            return numpy.log(-1 + numpy.exp(-lim_val))
-        else:
-            return numpy.log(-1 + numpy.exp(x))
-    elif b == (None, None):
-        return x
-
-# Gradient of the (0, inf) transform if the bound constrains it to be positive 
-def transform_grad(b, x):
-    if b == (0, None):
-        if x > lim_val:
-            #return x
-            return 1
-        elif x < -lim_val:
-            return 1 - numpy.exp(lim_val)
-        else:
-            return 1 - numpy.exp(-x)
-        #return 1. - 1. / (1 + numpy.exp(x))
-    elif b == (None, None):
-        return 1
 
 def calculate_global_statistics(options, global_statistics, accumulated_statistics_files, map_reduce):
     '''
@@ -381,8 +325,8 @@ def calculate_global_derivatives(options, partial_derivatives, accumulated_stati
         gradient['beta'] = partial_terms.grad_beta()
     else: 
         gradient['beta'] = numpy.zeros((1,1))
-    #print 'gradient'
-    #print gradient
+    print 'gradient'
+    print gradient
     return gradient
 
 

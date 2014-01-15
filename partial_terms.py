@@ -81,8 +81,11 @@ class partial_terms(object):
         self.exp_K_miY = kernel_exp.calc_expect_K_mi_Y(self.Z, self.hyp, self.X_mu, self.X_S, self.Y)
         self.sum_exp_K_ii = self.hyp.sf**2 * self.local_N
         self.Kmm_plus_op_inv = linalg.inv(self.Kmm + self.beta*self.sum_exp_K_mi_K_im)
-        mu_ip = np.array([x.dot(x) for x in self.X_mu])
-        self.KL = 0.5 * np.sum(np.sum(self.X_S - np.log(self.X_S), 1) + mu_ip - self.Q)
+        if not np.all(self.X_S == 0):
+            mu_ip = np.array([x.dot(x) for x in self.X_mu])
+            self.KL = 0.5 * np.sum(np.sum(self.X_S - np.log(self.X_S), 1) + mu_ip - self.Q)
+        else: # We have fixed embeddings
+            self.KL = 0
 
     def update_global_statistics(self):
         '''
@@ -382,7 +385,7 @@ class partial_terms(object):
 
 
     ###############################################################################
-    # grad_X_mu and grad_X_S, and local embedding optimisation
+    # grad_X_mu and grad_X_S
     ###############################################################################
 
     def grad_X_mu(self):
@@ -452,29 +455,6 @@ class partial_terms(object):
                              np.sum(dF_dexp_K_mi_K_im * dexp_K_mi_K_im_ds_iq))
 
         return dF
-
-    def local_optimisation(self):
-        '''
-        In this function we perform a fixed number of iterations of optimisation
-        for the local embeddings held in the class. The functions used for this
-        are grad_X_mu and grad_X_S
-        '''
-        eps = 0.01 # step size
-        # We're using one step of gradient ascent since we only know the current value of the gradients
-        new_X_mu = self.X_mu + eps * self.grad_X_mu()
-        new_X_S = self.X_S + eps * self.grad_X_S()
-        new_X_S[new_X_S < 0] = 10**-6
-
-        assert np.all(new_X_S > 0.0), "Variational variance is invalid."
-
-        # debug code to track update of latents
-        #print '(self.X_mu, self.X_S)'
-        #print (self.X_mu, self.X_S)
-        #print '(self.grad_X_mu(), self.grad_X_S())'
-        #print (self.grad_X_mu(), self.grad_X_S())
-        #print '(new_X_mu, new_X_S)'
-        #print (new_X_mu, new_X_S)
-        return (new_X_mu, new_X_S)
 
     ###############################################################################
     # Log marginal likelihood and necessary functions
