@@ -88,7 +88,7 @@ def main(opt_param = None):
     # Transform the positiv parameters to be in the range (-Inf, Inf)
     x0 = numpy.array([sp.transform_back(b, x) for b, x in zip(options['flat_global_statistics_bounds'], x0)])
     # Todo: Nothing seems to be done with the end result of the global optimisation?
-    x_opt = SCG_adapted(likelihood_and_gradient, x0, options['embeddings'], display=True, maxiters=options['iterations'])
+    x_opt = SCG_adapted(likelihood_and_gradient, x0, options['embeddings'], options['fixed_embeddings'], display=True, maxiters=options['iterations'])
     
     flat_array = x_opt[0]
     # Transform the parameters that have to be positive to be positive
@@ -149,11 +149,12 @@ def init_statistics(map_reduce, options):
         if not embeddings.shape[1] == options['Q']:
             raise Exception('Given Q does not equal existing embedding data dimensions!')
         # init embeddings using k-means (gives much better guess)
-        import scipy.cluster.vq as cl
-        Z = cl.kmeans(embeddings, options['M'])[0]
-        while Z.shape[0] < options['M']:
-            Z = cl.kmeans(embeddings, options['M'])[0]
-        Z += scipy.randn(options['M'], options['Q']) * 0.1
+        #import scipy.cluster.vq as cl
+        #Z = cl.kmeans(embeddings, options['M'])[0]
+        #while Z.shape[0] < options['M']:
+        #    Z = cl.kmeans(embeddings, options['M'])[0]
+        Z = embeddings[:options['M']]
+        #Z += scipy.randn(options['M'], options['Q']) * 0.1
 
         # Initialise the global statistics
         global_statistics = {

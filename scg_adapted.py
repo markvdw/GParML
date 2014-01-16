@@ -34,7 +34,7 @@ For the moment we're importing this directly over here in order to use its suppo
 This should be refactored to be passed as a class object from the main function.
 '''
 import local_MapReduce
-debug = False
+debug = True
 
 def print_out(len_maxiters, display, fnow, current_grad, beta, iteration):
     if display:
@@ -74,7 +74,7 @@ def safe_f_and_grad_f(f_and_gradf, x, iteration=0, step_size=0, *optargs):
         gradf = np.ones(x.shape)
     return f, gradf
 
-def SCG_adapted(f_and_gradf, x, tmp_folder, optargs=(), maxiters=500, max_f_eval=500, display=True, xtol=None, ftol=None, gtol=None):
+def SCG_adapted(f_and_gradf, x, tmp_folder, fixed_embeddings=False, optargs=(), maxiters=500, max_f_eval=500, display=True, xtol=None, ftol=None, gtol=None):
     """
     Optimisation through Scaled Conjugate Gradients (SCG)
 
@@ -103,8 +103,11 @@ def SCG_adapted(f_and_gradf, x, tmp_folder, optargs=(), maxiters=500, max_f_eval
     gradnew = f_gradf[1] # Initial gradient.
     gradold = gradnew.copy()
     d = -gradnew # Initial search direction.
-    local_MapReduce.embeddings_set_grads(tmp_folder)
-    current_grad = np.dot(gradnew, gradnew) + local_MapReduce.embeddings_get_grads_current_grad(tmp_folder)
+    if not fixed_embeddings:
+        local_MapReduce.embeddings_set_grads(tmp_folder)
+    current_grad = np.dot(gradnew, gradnew)
+    if not fixed_embeddings:
+        current_grad += local_MapReduce.embeddings_get_grads_current_grad(tmp_folder)
 
     success = True # Force calculation of directional derivs.
     nsuccess = 0 # nsuccess counts number of successes.
@@ -131,17 +134,27 @@ def SCG_adapted(f_and_gradf, x, tmp_folder, optargs=(), maxiters=500, max_f_eval
 
         # Calculate first and second directional derivatives.
         if success:
-            mu = np.dot(d, gradnew) + local_MapReduce.embeddings_get_grads_mu(tmp_folder)
+            mu = np.dot(d, gradnew)
+            if not fixed_embeddings:
+                mu += local_MapReduce.embeddings_get_grads_mu(tmp_folder)
             if mu >= 0:
                 d = -gradnew
-                local_MapReduce.embeddings_set_grads_reset_d(tmp_folder)
-                mu = np.dot(d, gradnew) + local_MapReduce.embeddings_get_grads_mu(tmp_folder)
-            kappa = np.dot(d, d) + local_MapReduce.embeddings_get_grads_kappa(tmp_folder)
+                if not fixed_embeddings:
+                    local_MapReduce.embeddings_set_grads_reset_d(tmp_folder)
+                mu = np.dot(d, gradnew)
+                if not fixed_embeddings:
+                    mu += local_MapReduce.embeddings_get_grads_mu(tmp_folder)
+            kappa = np.dot(d, d)
+            if not fixed_embeddings:
+                kappa += local_MapReduce.embeddings_get_grads_kappa(tmp_folder)
             sigma = sigma0 / np.sqrt(kappa)
             xplus = x + sigma * d
             gplus = safe_f_and_grad_f(f_and_gradf, xplus, iteration=-1, step_size=sigma, *optargs)[1]
             theta_global = np.dot(d, gplus)
-            theta_local = local_MapReduce.embeddings_get_grads_theta(tmp_folder)
+            if not fixed_embeddings:
+                theta_local = local_MapReduce.embeddings_get_grads_theta(tmp_folder)
+            else:
+                theta_local = 0
             theta = (theta_global + theta_local - mu) / sigma
             if debug:
                 print 'kappa'
@@ -181,7 +194,8 @@ def SCG_adapted(f_and_gradf, x, tmp_folder, optargs=(), maxiters=500, max_f_eval
             success = True
             nsuccess += 1
             x = xnew
-            local_MapReduce.embeddings_set_grads_update_X(tmp_folder, alpha)
+            if not fixed_embeddings:
+                local_MapReduce.embeddings_set_grads_update_X(tmp_folder, alpha)
             fnow = fnew
         else:
             success = False
@@ -211,10 +225,13 @@ def SCG_adapted(f_and_gradf, x, tmp_folder, optargs=(), maxiters=500, max_f_eval
 
         if success:
             # Test for termination
-            max_alpha_d = max(np.max(np.abs(alpha * d)), local_MapReduce.embeddings_get_grads_max_d(tmp_folder, alpha))
+            max_alpha_d = np.max(np.abs(alpha * d))
+            if not fixed_embeddings:
+                max_alpha_d = max(max_alpha_d, local_MapReduce.embeddings_get_grads_max_d(tmp_folder, alpha))
             if debug:
-                print 'local_MapReduce.embeddings_get_grads_max_d(tmp_folder, alpha)'
-                print local_MapReduce.embeddings_get_grads_max_d(tmp_folder, alpha)
+                if not fixed_embeddings:
+                    print 'local_MapReduce.embeddings_get_grads_max_d(tmp_folder, alpha)'
+                    print local_MapReduce.embeddings_get_grads_max_d(tmp_folder, alpha)
                 print 'np.max(np.abs(alpha * d))'
                 print np.max(np.abs(alpha * d))
                 print 'max_alpha_d'
@@ -227,11 +244,15 @@ def SCG_adapted(f_and_gradf, x, tmp_folder, optargs=(), maxiters=500, max_f_eval
             else:
                 # Update variables for new position
                 ''' A bug: this was called after the gradnew assignment and overridden in original implementation '''
-                gradold = gradnew
-                local_MapReduce.embeddings_set_grads_update_grad_old(tmp_folder)
                 gradnew = f_gradf[1]
-                local_MapReduce.embeddings_set_grads_update_grad_new(tmp_folder)
-                current_grad = np.dot(gradnew, gradnew) + local_MapReduce.embeddings_get_grads_current_grad(tmp_folder)
+                if not fixed_embeddings:
+                    local_MapReduce.embeddings_set_grads_update_grad_new(tmp_folder)
+                gradold = gradnew
+                if not fixed_embeddings:
+                    local_MapReduce.embeddings_set_grads_update_grad_old(tmp_folder)
+                current_grad = np.dot(gradnew, gradnew)
+                if not fixed_embeddings:
+                    current_grad += local_MapReduce.embeddings_get_grads_current_grad(tmp_folder)
                 fold = fnew
                 # If the gradient is zero then we are done.
                 if current_grad <= gtol:
@@ -249,11 +270,14 @@ def SCG_adapted(f_and_gradf, x, tmp_folder, optargs=(), maxiters=500, max_f_eval
         # in direction of negative gradient after nparams steps.
         if nsuccess == x.size:
             d = -gradnew
-            beta = 1.  # TODO: betareset!!
-            local_MapReduce.embeddings_set_grads_reset_d(tmp_folder)
+            #beta = 1.  # TODO: betareset!!
+            #if not fixed_embeddings:
+            #    local_MapReduce.embeddings_set_grads_reset_d(tmp_folder)
             nsuccess = 0
         elif success:
-            Gamma = (np.dot(gradold, gradnew) + local_MapReduce.embeddings_get_grads_gamma(tmp_folder) - current_grad) / (mu)
+            Gamma = (np.dot(gradold, gradnew) - current_grad) / (mu)
+            if not fixed_embeddings:
+                Gamma += local_MapReduce.embeddings_get_grads_gamma(tmp_folder) / (mu)
             if debug:
                 print 'Gamma'
                 print Gamma
@@ -261,7 +285,8 @@ def SCG_adapted(f_and_gradf, x, tmp_folder, optargs=(), maxiters=500, max_f_eval
                 print gradnew
                 print 
             d = Gamma * d - gradnew
-            local_MapReduce.embeddings_set_grads_update_d(tmp_folder, Gamma)
+            if not fixed_embeddings:
+                local_MapReduce.embeddings_set_grads_update_d(tmp_folder, Gamma)
     else:
         # If we get here, then we haven't terminated in the given number of
         # iterations.
