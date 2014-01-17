@@ -39,7 +39,7 @@ def main():
     #X_mu = PCA(Y_file, Q)
     #X_mu = scipy.randn(N, Q)
     X_S = numpy.clip(numpy.ones((N, Q)) * 0.5
-                        + 0.01 * scipy.randn(N, Q),
+                        + 0 * scipy.randn(N, Q),
                     0.001, 1)
     #X_S = numpy.zeros((N, Q))
 
@@ -56,9 +56,9 @@ def main():
         scipy.load('./easydata/embeddings/easy_4.variance.npy')))
     '''
     # Initialise the inducing points
-    Z = X_mu[numpy.random.permutation(N)[:M],:]
-    #Z = X_mu[:M,:]
-    Z += scipy.randn(M, Q) * 0.1
+    #Z = X_mu[numpy.random.permutation(N)[:M],:]
+    Z = X_mu[:M,:]
+    #Z += scipy.randn(M, Q) * 0.1
 
 
     global_statistics_names = {
@@ -71,17 +71,17 @@ def main():
         'alpha' : scipy.ones((1, Q)), # see GPy kern/rbf.py
         'beta' : numpy.array([[1.0]]), # see GPy likelihood/gaussian.py
         'X_Zmu' : X_mu,
-        'X_S' : X_S
+        'X_S' : X_S,
     }
 
     # Initialise bounds for optimisation
     global_statistics_bounds = {
         'Z' : [(None, None) for i in range(M * Q)],
-        'sf2' : [(0, None)],
-        'alpha' : [(0, None) for i in range(Q)],
-        'beta' : [(0, None)]
+        'sf2' : [('sf2', 'sf2')],
+        'alpha' : [('alpha', 'alpha') for i in range(Q)],
+        'beta' : [('beta', 'beta')],
         'X_mu' : [(None, None) for i in range(N * Q)],
-        'X_S' : [(0, None) for i in range(N * Q)]
+        'X_S' : [('X_S', 'X_S') for i in range(N * Q)],
     }
     flat_global_statistics_bounds = []
     for key, statistic in global_statistics_bounds.items():
@@ -126,7 +126,7 @@ def gradient(x):
 '''
 Likelihood and gradient functions
 '''
-def likelihood_and_gradient(flat_array):
+def likelihood_and_gradient(flat_array, iteration=0):
     global Kmm, Kmm_inv, accumulated_statistics, N, Y, flat_global_statistics_bounds, fix_beta, global_statistics_names
     # Transform the parameters that have to be positive to be positive
     flat_array_transformed = numpy.array([transform(b, x) for b, x in zip(flat_global_statistics_bounds, flat_array)])
@@ -256,6 +256,8 @@ def likelihood_and_gradient(flat_array):
     if not numpy.abs(GPy_lml - partial_derivatives['F']) < 10**-6:
         print '7'
     
+    
+    
     #print 'gradient'
     #print gradient
 
@@ -267,9 +269,6 @@ def likelihood_and_gradient(flat_array):
     #    'X_S' : dF_ds}
     #gradient = flatten_global_statistics(gradient)
     #likelihood = GPy_lml
-
-
-    
     gradient = {'Z' : grad_Z,
         'sf2' : grad_sf2,
         'alpha' : grad_alpha,
@@ -332,6 +331,14 @@ def transform(b, x):
             return numpy.log(1 + numpy.exp(-lim_val))
         else:
             return numpy.log(1 + numpy.exp(x))
+    elif b == ('sf2', 'sf2'):
+        return x
+    elif b == ('alpha', 'alpha'):
+        return x**-2
+    elif b == ('beta', 'beta'):
+        return x**-1
+    elif b == ('X_S', 'X_S'):
+        return x
     elif b == (None, None):
         return x
 
@@ -344,6 +351,14 @@ def transform_back(b, x):
             return numpy.log(-1 + numpy.exp(sys.float_info.epsilon))
         else:
             return numpy.log(-1 + numpy.exp(x))
+    elif b == ('sf2', 'sf2'):
+        return x
+    elif b == ('alpha', 'alpha'):
+        return x**-0.5
+    elif b == ('beta', 'beta'):
+        return x**-1
+    elif b == ('X_S', 'X_S'):
+        return x
     elif b == (None, None):
         return x
 
@@ -351,11 +366,22 @@ def transform_back(b, x):
 def transform_grad(b, x):
     if b == (0, None):
         if x > lim_val:
+            #return x
             return 1
         elif x < -lim_val:
-            return 1 - numpy.exp(lim_val)
+            return numpy.exp(lim_val) / (numpy.exp(lim_val) + 1)
         else:
-            return 1 - numpy.exp(-x)
+            ''' This should be reverted '''
+            return numpy.exp(x) / (numpy.exp(x) + 1)
+        #return 1. - 1. / (1 + numpy.exp(x))
+    elif b == ('sf2', 'sf2'):
+        return 1
+    elif b == ('alpha', 'alpha'):
+        return -2*x**3
+    elif b == ('beta', 'beta'):
+        return -x**2
+    elif b == ('X_S', 'X_S'):
+        return 1
     elif b == (None, None):
         return 1
 

@@ -200,6 +200,16 @@ class TestSequenceFunctions(unittest.TestCase):
 
         self.assertTrue(np.max(np.abs(pd)) < 1.0, 'pd : %f\ng  : %f\nfd : %f' % (np.max(np.abs(pd)), g, fd))
 
+        gkern = GPy.kern.rbf(self.Q, self.hyp.sf**2, self.hyp.ard, True)
+        sp = GPy.core.SparseGP(self.X_mu, GPy.likelihoods.Gaussian(self.Y, self.sn**2), gkern, self.Z, self.X_S)
+        sp._compute_kernel_matrices()
+        sp._computations()
+        GPy_beta = sp.partial_for_likelihood
+
+        pd = (g * -1 * self.sn**-4 - GPy_beta) / GPy_beta * 100
+
+        self.assertLess(pd, 1.0, "Difference between GPy and our implementation: %f" % (pd))
+
 #     def test_grad_Z_to_GPy(self):
 #         gkern = GPy.kern.rbf(self.Q, self.hyp.sf**2, self.hyp.ard, True)
 #         sp = GPy.core.SparseGP(self.X_mu, GPy.likelihoods.Gaussian(self.Y, self.sn**2), gkern, self.Z, self.X_S)

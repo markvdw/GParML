@@ -88,7 +88,7 @@ def main(opt_param = None):
     # Transform the positiv parameters to be in the range (-Inf, Inf)
     x0 = numpy.array([sp.transform_back(b, x) for b, x in zip(options['flat_global_statistics_bounds'], x0)])
     # Todo: Nothing seems to be done with the end result of the global optimisation?
-    x_opt = SCG_adapted(likelihood_and_gradient, x0, options['embeddings'], display=True, maxiters=options['iterations'])
+    x_opt = SCG_adapted(likelihood_and_gradient, x0, options['embeddings'], options['fixed_embeddings'], display=True, maxiters=options['iterations'])
     
     flat_array = x_opt[0]
     # Transform the parameters that have to be positive to be positive
@@ -153,6 +153,7 @@ def init_statistics(map_reduce, options):
         Z = cl.kmeans(embeddings, options['M'])[0]
         while Z.shape[0] < options['M']:
             Z = cl.kmeans(embeddings, options['M'])[0]
+        #Z = embeddings[:10]
         Z += scipy.randn(options['M'], options['Q']) * 0.1
 
         # Initialise the global statistics
@@ -291,6 +292,109 @@ def calculate_global_statistics(options, global_statistics, accumulated_statisti
     for key in partial_derivatives.keys():
         file_name = options['statistics'] + '/partial_derivatives_' + key + '_' + str(options['i']) + '.npy'
         map_reduce.save(file_name, partial_derivatives[key])
+
+    ####################################################################################################################
+    # Debug comparison to GPy
+    ####################################################################################################################
+    import GPy
+    gkern = GPy.kern.rbf(options['Q'], global_statistics['sf2'].squeeze(), global_statistics['alpha'].squeeze()**-0.5, True)
+
+    if not options['fixed_embeddings'] and options['step_size'] != 0:
+        d0 = numpy.array([
+        scipy.load('./easydata/embeddings/easy_1.grad_d.npy')[0],
+        scipy.load('./easydata/embeddings/easy_2.grad_d.npy')[0],
+        scipy.load('./easydata/embeddings/easy_3.grad_d.npy')[0],
+        scipy.load('./easydata/embeddings/easy_4.grad_d.npy')[0]])
+        d1 = numpy.array([
+        scipy.load('./easydata/embeddings/easy_1.grad_d.npy')[1],
+        scipy.load('./easydata/embeddings/easy_2.grad_d.npy')[1],
+        scipy.load('./easydata/embeddings/easy_3.grad_d.npy')[1],
+        scipy.load('./easydata/embeddings/easy_4.grad_d.npy')[1]])
+    else:
+        d0 = numpy.zeros((4))
+        d1 = numpy.zeros((4))
+
+    X_mu = numpy.concatenate((
+    scipy.load('./easydata/embeddings/easy_1.embedding.npy') + options['step_size'] * d0[0],
+    scipy.load('./easydata/embeddings/easy_2.embedding.npy') + options['step_size'] * d0[1],
+    scipy.load('./easydata/embeddings/easy_3.embedding.npy') + options['step_size'] * d0[2],
+    scipy.load('./easydata/embeddings/easy_4.embedding.npy') + options['step_size'] * d0[3]))
+
+    X_S = numpy.concatenate((
+    scipy.load('./easydata/embeddings/easy_1.variance.npy') + options['step_size'] * d1[0],
+    scipy.load('./easydata/embeddings/easy_2.variance.npy') + options['step_size'] * d1[1],
+    scipy.load('./easydata/embeddings/easy_3.variance.npy') + options['step_size'] * d1[2],
+    scipy.load('./easydata/embeddings/easy_4.variance.npy') + options['step_size'] * d1[3]))
+    if not options['fixed_embeddings']:
+        X_S = sp.transformVar(X_S)
+
+    Y = numpy.concatenate((
+    numpy.genfromtxt('./easydata/inputs/easy_1', delimiter=','),
+    numpy.genfromtxt('./easydata/inputs/easy_2', delimiter=','),
+    numpy.genfromtxt('./easydata/inputs/easy_3', delimiter=','),
+    numpy.genfromtxt('./easydata/inputs/easy_4', delimiter=',')))
+
+    if not options['fixed_embeddings']:
+        gpy = GPy.models.BayesianGPLVM(GPy.likelihoods.Gaussian(Y, global_statistics['beta']**-1), options['Q'], X_mu, X_S, num_inducing=options['M'], Z=global_statistics['Z'], kernel=gkern)
+        GPy_lml = gpy.log_likelihood()
+        GPy_grad = gpy._log_likelihood_gradients()
+        dF_dmu = GPy_grad[0:(options['N'] * options['Q'])].reshape(options['N'], options['Q'])
+        dF_ds = GPy_grad[(options['N'] * options['Q']):2*(options['N'] * options['Q'])].reshape(options['N'], options['Q'])
+        dF_dZ = GPy_grad[2*(options['N'] * options['Q']):2*(options['N'] * options['Q'])+(options['M']*options['Q'])].reshape(options['M'], options['Q'])
+        dF_dsigma2 = GPy_grad[2*(options['N'] * options['Q'])+(options['M']*options['Q'])]
+        dF_dalpha = GPy_grad[2*(options['N'] * options['Q'])+(options['M']*options['Q'])+1:2*(options['N'] * options['Q'])+(options['M']*options['Q'])+3]
+        dF_dbeta = GPy_grad[2*(options['N'] * options['Q'])+(options['M'] * options['Q'])+3:]
+    else:
+        gpy = GPy.models.SparseGPRegression(X_mu, Y, gkern, Z=global_statistics['Z'], num_inducing=options['M'], X_variance=X_S)
+        gpy.likelihood._set_params(global_statistics['beta']**-1)
+        gpy._compute_kernel_matrices()
+        gpy._computations()
+        GPy_lml = gpy.log_likelihood()
+        GPy_grad = gpy._log_likelihood_gradients()
+        dF_dZ = GPy_grad[:(options['M']*options['Q'])].reshape(options['M'], options['Q'])
+        dF_dsigma2 = GPy_grad[(options['M']*options['Q'])]
+        dF_dalpha = GPy_grad[(options['M']*options['Q'])+1:(options['M']*options['Q'])+3]
+        dF_dbeta = GPy_grad[(options['M'] * options['Q'])+3:]
+
+    partial_terms.set_data(Y, X_mu, X_S, False)
+    dF_dmu2 = partial_terms.grad_X_mu()
+    dF_ds2 = partial_terms.grad_X_S()
+    dF_dZ2 = partial_terms.grad_Z(partial_derivatives['dF_dKmm'],
+        partial_terms.dKmm_dZ(),
+        partial_derivatives['dF_dsum_exp_K_miY'],
+        accumulated_statistics['sum_d_exp_K_miY_d_Z'],
+        partial_derivatives['dF_dsum_exp_K_mi_K_im'],
+        accumulated_statistics['sum_d_exp_K_mi_K_im_d_Z'])
+    dF_dalpha2 = partial_terms.grad_alpha(partial_derivatives['dF_dKmm'],
+        partial_terms.dKmm_dalpha(),
+        partial_derivatives['dF_dsum_exp_K_miY'],
+        accumulated_statistics['sum_d_exp_K_miY_d_alpha'],
+        partial_derivatives['dF_dsum_exp_K_mi_K_im'],
+        accumulated_statistics['sum_d_exp_K_mi_K_im_d_alpha']) * -2 * global_statistics['alpha']**1.5
+    dF_dsigma22 = partial_terms.grad_sf2(partial_derivatives['dF_dKmm'],
+        partial_terms.dKmm_dsf2(),
+        partial_derivatives['dF_dsum_exp_K_ii'],
+        accumulated_statistics['sum_d_exp_K_ii_d_sf2'],
+        partial_derivatives['dF_dsum_exp_K_miY'],
+        accumulated_statistics['sum_d_exp_K_miY_d_sf2'],
+        partial_derivatives['dF_dsum_exp_K_mi_K_im'],
+        accumulated_statistics['sum_d_exp_K_mi_K_im_d_sf2'])
+    dF_dbeta2 = partial_terms.grad_beta() * -1 * global_statistics['beta']**2
+
+    if not options['fixed_embeddings'] and not numpy.sum(numpy.abs(dF_dmu - dF_dmu2)) < 10**-6:
+        print '1'
+    if not numpy.sum(numpy.abs(dF_dZ - dF_dZ2)) < 10**-6:
+        print '2'
+    if not options['fixed_embeddings'] and not numpy.sum(numpy.abs(dF_ds - dF_ds2)) < 10**-6:
+        print '3'
+    if not numpy.sum(numpy.abs(dF_dalpha - dF_dalpha2)) < 10**-6:
+        print '4'
+    if not numpy.sum(numpy.abs(dF_dsigma2 - dF_dsigma22))  < 10**-6:
+        print '5'
+    if not numpy.sum(numpy.abs(dF_dbeta - dF_dbeta2))  < 10**-6:
+        print '6'
+    if not numpy.abs(GPy_lml - partial_derivatives['F']) < 10**-6:
+        print '7'
 
     return partial_derivatives, accumulated_statistics, partial_terms
 
