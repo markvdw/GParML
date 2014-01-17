@@ -37,3 +37,7 @@ __pycache__
 *.xdy
 *.tdo
 *.*~
+/easydata.pdf
+/easydata.tex
+/output.txt
+/*.gitignore

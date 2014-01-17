@@ -5,7 +5,6 @@ import numpy
 import partial_terms as pt
 import kernels
 from numpy.linalg.linalg import LinAlgError
-# from scg import SCG
 from gd import GD
 
 D = 3
@@ -40,7 +39,7 @@ def main():
     #X_mu = PCA(Y_file, Q)
     #X_mu = scipy.randn(N, Q)
     X_S = numpy.clip(numpy.ones((N, Q)) * 0.5
-                        + 0 * scipy.randn(N, Q),
+                        + 0.01 * scipy.randn(N, Q),
                     0.001, 1)
     #X_S = numpy.zeros((N, Q))
 
@@ -57,9 +56,9 @@ def main():
         scipy.load('./easydata/embeddings/easy_4.variance.npy')))
     '''
     # Initialise the inducing points
-    #Z = X_mu[numpy.random.permutation(N)[:M],:]
-    Z = X_mu[:M,:]
-    #Z += scipy.randn(M, Q) * 0.1
+    Z = X_mu[numpy.random.permutation(N)[:M],:]
+    #Z = X_mu[:M,:]
+    Z += scipy.randn(M, Q) * 0.1
 
 
     global_statistics_names = {
@@ -127,7 +126,7 @@ def gradient(x):
 '''
 Likelihood and gradient functions
 '''
-def likelihood_and_gradient(flat_array, iteration=0):
+def likelihood_and_gradient(flat_array):
     global Kmm, Kmm_inv, accumulated_statistics, N, Y, flat_global_statistics_bounds, fix_beta, global_statistics_names
     # Transform the parameters that have to be positive to be positive
     flat_array_transformed = numpy.array([transform(b, x) for b, x in zip(flat_global_statistics_bounds, flat_array)])
@@ -256,9 +255,7 @@ def likelihood_and_gradient(flat_array, iteration=0):
         print '6'
     if not numpy.abs(GPy_lml - partial_derivatives['F']) < 10**-6:
         print '7'
-    
-    
-    
+
     #print 'gradient'
     #print gradient
 
@@ -270,6 +267,8 @@ def likelihood_and_gradient(flat_array, iteration=0):
     #    'X_S' : dF_ds}
     #gradient = flatten_global_statistics(gradient)
     #likelihood = GPy_lml
+
+
     gradient = {'Z' : grad_Z,
         'sf2' : grad_sf2,
         'alpha' : grad_alpha,
@@ -332,14 +331,6 @@ def transform(b, x):
             return numpy.log(1 + numpy.exp(-lim_val))
         else:
             return numpy.log(1 + numpy.exp(x))
-    elif b == ('sf2', 'sf2'):
-        return x
-    elif b == ('alpha', 'alpha'):
-        return x**-2
-    elif b == ('beta', 'beta'):
-        return x**-1
-    elif b == ('X_S', 'X_S'):
-        return x
     elif b == (None, None):
         return x
 
@@ -352,14 +343,6 @@ def transform_back(b, x):
             return numpy.log(-1 + numpy.exp(sys.float_info.epsilon))
         else:
             return numpy.log(-1 + numpy.exp(x))
-    elif b == ('sf2', 'sf2'):
-        return x
-    elif b == ('alpha', 'alpha'):
-        return x**-0.5
-    elif b == ('beta', 'beta'):
-        return x**-1
-    elif b == ('X_S', 'X_S'):
-        return x
     elif b == (None, None):
         return x
 
@@ -367,22 +350,11 @@ def transform_back(b, x):
 def transform_grad(b, x):
     if b == (0, None):
         if x > lim_val:
-            #return x
             return 1
         elif x < -lim_val:
             return numpy.exp(lim_val) / (numpy.exp(lim_val) + 1)
         else:
-            ''' This should be reverted '''
-            return numpy.exp(x) / (numpy.exp(x) + 1)
-        #return 1. - 1. / (1 + numpy.exp(x))
-    elif b == ('sf2', 'sf2'):
-        return 1
-    elif b == ('alpha', 'alpha'):
-        return -2*x**3
-    elif b == ('beta', 'beta'):
-        return -x**2
-    elif b == ('X_S', 'X_S'):
-        return 1
+            return 1 / (numpy.exp(-x) + 1)
     elif b == (None, None):
         return 1
 

@@ -143,13 +143,11 @@ def transform_back(b, x):
 def transform_grad(b, x):
     if b == (0, None):
         if x > lim_val:
-            #return x
             return 1
         elif x < -lim_val:
-            return 1 - numpy.exp(lim_val)
+            return numpy.exp(lim_val) / (numpy.exp(lim_val) + 1)
         else:
-            return 1 - numpy.exp(-x)
-        #return 1. - 1. / (1 + numpy.exp(x))
+            return 1 / (numpy.exp(-x) + 1)
     elif b == (None, None):
         return 1
 
@@ -171,8 +169,8 @@ def transformVar_back(x):
 
 # Gradient of the (0, inf) transform if the bound constraints it to be positive 
 def transformVar_grad(x):
-    val = 1 - numpy.exp(-x)
+    val = 1 / (numpy.exp(-x) + 1)
     val[x > lim_val] = 1
-    val[x < -lim_val] = 1 - numpy.exp(lim_val)
+    val[x < -lim_val] = 1 / (numpy.exp(lim_val) + 1)
     return val
 
