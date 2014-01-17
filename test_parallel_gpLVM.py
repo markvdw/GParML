@@ -6,7 +6,7 @@ sys.path.append('./tools/')
 import show_embeddings
 import shutil
 
-iterations = 1
+iterations = 100
 
 class empty:
 	pass
@@ -48,9 +48,13 @@ parallel_GPLVM.main(options)
 shutil.rmtree('./easydata/embeddings_GPy_init')
 shutil.copytree('./easydata/embeddings', './easydata/embeddings_GPy_init')
 
+print('')
+print('>>>> NOW STARTING THE OPTIMISATION FOR PARALLEL-GPLVM')
+print('')
+
 options['iterations'] = iterations
 options['load'] = False
-options['fixed_embeddings'] = True
+options['fixed_embeddings'] = False
 parallel_GPLVM.main(options)
 
 #show_embeddings.run(disp_opt, args)
@@ -72,7 +76,7 @@ X_mu = numpy.concatenate((
     scipy.load('./easydata/embeddings_GPy_init/easy_4.embedding.npy')))
 
 X_S = numpy.clip(numpy.ones(X_mu.shape) * 0.5,
-                    0.001, 1) * 0
+                    0.001, 1)
 
 Y = numpy.concatenate((
     numpy.genfromtxt('./easydata/inputs/easy_1', delimiter=','),
@@ -81,9 +85,10 @@ Y = numpy.concatenate((
     numpy.genfromtxt('./easydata/inputs/easy_4', delimiter=',')))
 
 
-# sp = GPy.models.BayesianGPLVM(GPy.likelihoods.Gaussian(Y, 1), options['Q'], X_mu, X_S, num_inducing=options['M'], Z=X_mu[:10], kernel=gkern)
+sp = GPy.models.BayesianGPLVM(GPy.likelihoods.Gaussian(Y, 1), options['Q'], X_mu, X_S, num_inducing=options['M'], Z=X_mu[:10], kernel=gkern)
 # sp = GPy.core.SparseGP(X_mu, GPy.likelihoods.Gaussian(Y, 1))
-sp = GPy.models.SparseGPRegression(X_mu, Y, gkern, Z=X_mu[:10], num_inducing=options['M'], X_variance=X_S)
+#sp = GPy.models.SparseGPRegression(X_mu, Y, gkern, Z=X_mu[:10], num_inducing=options['M'], X_variance=X_S)
+#sp.ensure_default_constraints() -- doesn't work
 sp.optimize('scg', max_iters=iterations)
 
 GPy_lml = sp.log_likelihood()

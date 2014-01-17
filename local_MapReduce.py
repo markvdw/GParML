@@ -113,7 +113,7 @@ def statistics_MR(options):
     '''
     Gets as input options and statistics to use in accumulation; returns as output partial sums. Writes files to /tmp/ to pass information between different nodes.
     '''
-    input_files = glob.glob(options['input'] + '/*')
+    input_files = sorted(glob.glob(options['input'] + '/*'))
     # Send both input_file_name and options to each mapper
     arguments = zip(input_files,itertools.repeat(options))
     # pool = multiprocessing.Pool(len(input_files))
@@ -244,7 +244,7 @@ def embeddings_MR(options):
     if we are optimising the embeddings, so no further checks are made.
     '''
 
-    input_files = glob.glob(options['input'] + '/*')
+    input_files = sorted(glob.glob(options['input'] + '/*'))
     # Send options to each mapper
     arguments = zip(input_files,itertools.repeat(options))
     # pool = multiprocessing.Pool(len(input_files))
@@ -302,7 +302,11 @@ def embeddings_mapper((input_file_name, options)):
     grad_X_mu = partial_terms.grad_X_mu()
     grad_X_S = partial_terms.grad_X_S() * sp.transformVar_grad(X_S_orig)
     local_latest_grad_name = options['embeddings'] + '/' + basename(input_file_name) + '.grad_latest.npy'
-    save(local_latest_grad_name, numpy.array([grad_X_mu, grad_X_S]))
+    '''
+    IMPORTANT TO PORT BACK
+    '''
+    # We need to flip the sign of the grads for optimisation
+    save(local_latest_grad_name, -1 * numpy.array([grad_X_mu, grad_X_S]))
 
 
 
@@ -323,9 +327,11 @@ def embeddings_set_grads(folder):
     need to do this in parallel though, as the computaions taking place are not that 
     time consuming.
     '''
-    input_files = glob.glob(folder + '/*.grad_latest.npy')
+    input_files = sorted(glob.glob(folder + '/*.grad_latest.npy'))
     for file_name in input_files:
         grads = load(file_name)
+        print 'grads'
+        print grads
         # Save grad new as the latest grad evaluated
         new_file = splitext(splitext(file_name)[0])[0] + '.grad_new.npy'
         save(new_file, grads)
@@ -368,12 +374,14 @@ def embeddings_get_grads_theta(folder):
     Get the sum over the inputs of the inner product of the direction and grad_latest
     '''
     theta = 0
+    grad_new_files = sorted(glob.glob(folder + '/*.grad_new.npy'))
     grad_latest_files = sorted(glob.glob(folder + '/*.grad_latest.npy'))
     grad_d_files = sorted(glob.glob(folder + '/*.grad_d.npy'))
-    for grad_latest_file, grad_d_file in zip(grad_latest_files, grad_d_files):
+    for grad_latest_file, grad_d_file, grad_new_file in zip(grad_latest_files, grad_d_files, grad_new_files):
         grad_latest = load(grad_latest_file)
+        grad_new = load(grad_new_file)
         grad_d = load(grad_d_file)
-        theta += (grad_latest * grad_d).sum()
+        theta += (grad_d * (grad_latest - grad_new)).sum()
     return theta
 
 def embeddings_get_grads_current_grad(folder):
@@ -418,7 +426,7 @@ def embeddings_set_grads_reset_d(folder):
     '''
     Reset the direction to be the negative of grad_new
     '''
-    input_files = glob.glob(folder + '/*.grad_new.npy')
+    input_files = sorted(glob.glob(folder + '/*.grad_new.npy'))
     for file_name in input_files:
         grads = load(file_name)
         # Save the direction as the negative grad
@@ -450,6 +458,10 @@ def embeddings_set_grads_update_X(folder, alpha):
         grad_d_X_S = grad_d[1]
         X_mu = load(X_mu_file)
         X_S = load(X_S_file)
+        print 'X_mu'
+        print X_mu
+        print 'X_S'
+        print X_S
         save(X_mu_file, X_mu + alpha * grad_d_X_mu)
         save(X_S_file, X_S + alpha * grad_d_X_S)
 
@@ -457,7 +469,7 @@ def embeddings_set_grads_update_grad_old(folder):
     '''
     Set grad_old to be grad_new
     '''
-    input_files = glob.glob(folder + '/*.grad_new.npy')
+    input_files = sorted(glob.glob(folder + '/*.grad_new.npy'))
     for file_name in input_files:
         grads = load(file_name)
         # Save grad old as latest grad new
@@ -468,7 +480,7 @@ def embeddings_set_grads_update_grad_new(folder):
     '''
     Set grad_new to be grad_latest (a temp grad that keeps changing every evaluation)
     '''
-    input_files = glob.glob(folder + '/*.grad_latest.npy')
+    input_files = sorted(glob.glob(folder + '/*.grad_latest.npy'))
     for file_name in input_files:
         grads = load(file_name)
         # Save grad old as latest grad new

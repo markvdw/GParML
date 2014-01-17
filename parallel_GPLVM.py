@@ -173,9 +173,9 @@ def init_statistics(map_reduce, options):
     # Initialise bounds for optimisation
     global_statistics_bounds = {
         'Z' : [(None, None) for i in range(options['M'] * options['Q'])],
-        'sf2' : [(0, None)],
-        'alpha' : [(0, None) for i in range(options['Q'])],
-        'beta' : [(0, None)]
+        'sf2' : [('sf2', 'sf2')],
+        'alpha' : [('alpha', 'alpha') for i in range(options['Q'])],
+        'beta' : [('beta', 'beta')]
     }
     flat_global_statistics_bounds = []
     for key, statistic in global_statistics_bounds.items():
@@ -238,6 +238,12 @@ def likelihood_and_gradient(flat_array, iteration, step_size=0):
 
     gradient = numpy.array([g * sp.transform_grad(b, x) for b, x, g in 
         zip(options['flat_global_statistics_bounds'], flat_array, gradient)])
+    print 'likelihood'
+    print likelihood
+    print 'transformed x'
+    print flat_array
+    print 'transformed gradient'
+    print -1*gradient
     return -1 * likelihood, -1 * gradient
 
 

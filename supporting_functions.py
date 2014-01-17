@@ -124,6 +124,12 @@ def transform(b, x):
             return numpy.log(1 + numpy.exp(-lim_val))
         else:
             return numpy.log(1 + numpy.exp(x))
+    elif b == ('sf2', 'sf2'):
+        return x
+    elif b == ('alpha', 'alpha'):
+        return x**-2
+    elif b == ('beta', 'beta'):
+        return x**-1
     elif b == (None, None):
         return x
 
@@ -136,6 +142,12 @@ def transform_back(b, x):
             return numpy.log(-1 + numpy.exp(sys.float_info.epsilon))
         else:
             return numpy.log(-1 + numpy.exp(x))
+    elif b == ('sf2', 'sf2'):
+        return x
+    elif b == ('alpha', 'alpha'):
+        return x**-0.5
+    elif b == ('beta', 'beta'):
+        return x**-1
     elif b == (None, None):
         return x
 
@@ -146,10 +158,17 @@ def transform_grad(b, x):
             #return x
             return 1
         elif x < -lim_val:
-            return 1 - numpy.exp(lim_val)
+            return numpy.exp(lim_val) / (numpy.exp(lim_val) + 1)
         else:
-            return 1 - numpy.exp(-x)
+            ''' This should be reverted '''
+            return numpy.exp(x) / (numpy.exp(x) + 1)
         #return 1. - 1. / (1 + numpy.exp(x))
+    elif b == ('sf2', 'sf2'):
+        return 1
+    elif b == ('alpha', 'alpha'):
+        return -2*x**3
+    elif b == ('beta', 'beta'):
+        return -x**2
     elif b == (None, None):
         return 1
 
