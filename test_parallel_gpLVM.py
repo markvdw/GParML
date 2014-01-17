@@ -86,7 +86,7 @@ Y = numpy.concatenate((
 
 
 sp = GPy.models.BayesianGPLVM(GPy.likelihoods.Gaussian(Y, 1), options['Q'],
-                              X_mu, X_S, num_inducing=options['M'], Z=X_mu[10:20], kernel=gkern)
+                              X_mu, X_S, num_inducing=options['M'], Z=X_mu[:10], kernel=gkern)
 # sp = GPy.core.SparseGP(X_mu, GPy.likelihoods.Gaussian(Y, 1))
 #sp = GPy.models.SparseGPRegression(X_mu, Y, gkern, Z=X_mu[:10], num_inducing=options['M'], X_variance=X_S)
 #sp.ensure_default_constraints() -- doesn't work
