@@ -178,8 +178,8 @@ def statistics_mapper((input_file_name, options)):
         # Transform the parameters that have to be positive to be positive
         X_S = sp.transformVar(X_S)
 
-        #print X_mu
-        #print X_S
+    #print X_mu
+    #print X_S
 
     # Calculate partial statistics...
     partial_terms = load_partial_terms(options, global_statistics)
@@ -330,8 +330,8 @@ def embeddings_set_grads(folder):
     input_files = sorted(glob.glob(folder + '/*.grad_latest.npy'))
     for file_name in input_files:
         grads = load(file_name)
-        print 'grads'
-        print grads
+        #print 'grads'
+        #print grads
         # Save grad new as the latest grad evaluated
         new_file = splitext(splitext(file_name)[0])[0] + '.grad_new.npy'
         save(new_file, grads)
@@ -458,10 +458,10 @@ def embeddings_set_grads_update_X(folder, alpha):
         grad_d_X_S = grad_d[1]
         X_mu = load(X_mu_file)
         X_S = load(X_S_file)
-        print 'X_mu'
-        print X_mu
-        print 'X_S'
-        print X_S
+        #print 'X_mu'
+        #print X_mu
+        #print 'X_S'
+        #print X_S
         save(X_mu_file, X_mu + alpha * grad_d_X_mu)
         save(X_S_file, X_S + alpha * grad_d_X_S)
 

@@ -262,12 +262,12 @@ def SCG_adapted(f_and_gradf, x, tmp_folder, fixed_embeddings=False, optargs=(), 
             else:
                 # Update variables for new position
                 ''' A bug: this was called after the gradnew assignment and overridden in original implementation '''
-                gradold = gradnew
-                if not fixed_embeddings:
-                    local_MapReduce.embeddings_set_grads_update_grad_old(tmp_folder)
                 gradnew = f_gradf[1]
                 if not fixed_embeddings:
                     local_MapReduce.embeddings_set_grads_update_grad_new(tmp_folder)
+                gradold = gradnew
+                if not fixed_embeddings:
+                    local_MapReduce.embeddings_set_grads_update_grad_old(tmp_folder)
                 current_grad = np.dot(gradnew, gradnew)
                 if not fixed_embeddings:
                     current_grad += local_MapReduce.embeddings_get_grads_current_grad(tmp_folder)

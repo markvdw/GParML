@@ -125,6 +125,7 @@ def transform(b, x):
         else:
             return numpy.log(1 + numpy.exp(x))
     elif b == ('sf2', 'sf2'):
+        assert x >= 0
         return x
     elif b == ('alpha', 'alpha'):
         return x**-2
@@ -143,6 +144,7 @@ def transform_back(b, x):
         else:
             return numpy.log(-1 + numpy.exp(x))
     elif b == ('sf2', 'sf2'):
+        assert x >= 0
         return x
     elif b == ('alpha', 'alpha'):
         return x**-0.5
@@ -164,6 +166,7 @@ def transform_grad(b, x):
             return numpy.exp(x) / (numpy.exp(x) + 1)
         #return 1. - 1. / (1 + numpy.exp(x))
     elif b == ('sf2', 'sf2'):
+        assert x >= 0
         return 1
     elif b == ('alpha', 'alpha'):
         return -2*x**3

@@ -5,7 +5,8 @@ import numpy
 import partial_terms as pt
 import kernels
 from numpy.linalg.linalg import LinAlgError
-from scg import SCG
+# from scg import SCG
+from gd import GD
 
 D = 3
 Q  = 2
@@ -24,7 +25,7 @@ fix_beta = {}
 def main():
     global N, Y, X_mu, X_S, flat_global_statistics_bounds, fix_beta, global_statistics_names
 
-    iterations = 20
+    iterations = 100
 
     # Load data
     Y = numpy.concatenate((
@@ -77,11 +78,11 @@ def main():
     # Initialise bounds for optimisation
     global_statistics_bounds = {
         'Z' : [(None, None) for i in range(M * Q)],
-        'sf2' : [('sf2', 'sf2')],
-        'alpha' : [('alpha', 'alpha') for i in range(Q)],
-        'beta' : [('beta', 'beta')],
+        'sf2' : [(0, None)],
+        'alpha' : [(0, None) for i in range(Q)],
+        'beta' : [(0, None)],
         'X_mu' : [(None, None) for i in range(N * Q)],
-        'X_S' : [('X_S', 'X_S') for i in range(N * Q)],
+        'X_S' : [(0, None) for i in range(N * Q)],
     }
     flat_global_statistics_bounds = []
     for key, statistic in global_statistics_bounds.items():
@@ -100,7 +101,7 @@ def main():
     The number of iterations might be greater than max_f_eval
     '''
     #fix_beta = True
-    x = SCG(likelihood, gradient, x0, display=True, maxiters=iterations)
+    x = GD(likelihood, gradient, x0, display=True, maxiters=iterations)
     #fix_beta = False
     #x = SC(likelihood_and_gradient, x[0], display=True, maxiters=iterations)
     flat_array = x[0]

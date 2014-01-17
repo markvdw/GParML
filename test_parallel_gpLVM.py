@@ -6,7 +6,7 @@ sys.path.append('./tools/')
 import show_embeddings
 import shutil
 
-iterations = 100
+iterations = 20
 
 class empty:
 	pass
@@ -85,7 +85,8 @@ Y = numpy.concatenate((
     numpy.genfromtxt('./easydata/inputs/easy_4', delimiter=',')))
 
 
-sp = GPy.models.BayesianGPLVM(GPy.likelihoods.Gaussian(Y, 1), options['Q'], X_mu, X_S, num_inducing=options['M'], Z=X_mu[:10], kernel=gkern)
+sp = GPy.models.BayesianGPLVM(GPy.likelihoods.Gaussian(Y, 1), options['Q'],
+                              X_mu, X_S, num_inducing=options['M'], Z=X_mu[10:20], kernel=gkern)
 # sp = GPy.core.SparseGP(X_mu, GPy.likelihoods.Gaussian(Y, 1))
 #sp = GPy.models.SparseGPRegression(X_mu, Y, gkern, Z=X_mu[:10], num_inducing=options['M'], X_variance=X_S)
 #sp.ensure_default_constraints() -- doesn't work
