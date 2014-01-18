@@ -1,8 +1,4 @@
 # Copyright I. Nabney, N.Lawrence and James Hensman (1996 - 2012)
-'''
-Adapted version of SCG that makes use of a single objective_and_gradient function
-for cases when it is cheaper to evaluate both together
-'''
 # Scaled Conjuagte Gradients, originally in Matlab as part of the Netlab toolbox by I. Nabney, converted to python N. Lawrence and given a pythonic interface by James Hensman
 
 #      THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT
@@ -24,16 +20,17 @@ for cases when it is cheaper to evaluate both together
 #      OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #      POSSIBILITY OF SUCH DAMAGE.
 
+'''
+Adapted version of SCG that makes use of a single objective_and_gradient function
+for cases when it is cheaper to evaluate both together
+'''
+
 
 import numpy as np
 import sys
 from numpy.linalg.linalg import LinAlgError
 import warnings
-''' 
-For the moment we're importing this directly over here in order to use its supporting functions. 
-This should be refactored to be passed as a class object from the main function.
-'''
-import local_MapReduce
+import scg_adapted_local_MapReduce as local_MapReduce
 debug = False
 
 def print_out(len_maxiters, display, fnow, current_grad, beta, iteration):

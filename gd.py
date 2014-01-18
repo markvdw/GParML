@@ -21,7 +21,9 @@
 
 
 import numpy as np
+from numpy.linalg.linalg import LinAlgError
 import sys
+import gd_local_MapReduce as local_MapReduce
 
 
 def print_out(len_maxiters, display, fnow, current_grad, beta, iteration):
@@ -30,7 +32,30 @@ def print_out(len_maxiters, display, fnow, current_grad, beta, iteration):
         print '{0:>0{mi}g}  {1:> 12e}  {2:> 12e}  {3:> 12e}'.format(iteration, float(fnow), float(beta), float(current_grad), mi=len_maxiters), # print 'Iteration:', iteration, ' Objective:', fnow, '  Scale:', beta, '\r',
         sys.stdout.flush()
 
-def GD(f, gradf, x, optargs=(), maxiters=500, max_f_eval=500, display=True, xtol=None, ftol=None, gtol=None):
+_fail_count = 0
+_allowed_failures = 100
+def safe_f_and_grad_f(f_and_gradf, x, iteration=0, step_size=0, *optargs):
+    '''
+    Calls f and gradf and returns inf for f in case of warnings / assertion errors and so on.
+    The returned gradf in that case is 0, which screws up SCG's momentum, so a re-start should be done
+    '''
+    global _fail_count, _allowed_failures
+    try:
+        [f, gradf] = f_and_gradf(x, iteration, step_size, *optargs)
+        _fail_count = 0
+    except (LinAlgError, ZeroDivisionError, ValueError, Warning, AssertionError) as e:
+        if _fail_count >= _allowed_failures:
+            print 'Too many errors...'
+            raise e
+        _fail_count += 1
+        print
+        print '\tIncreasing failed count: ' + str(_fail_count)
+        print
+        f = np.inf
+        gradf = np.ones(x.shape)
+    return f, gradf
+
+def GD(f_and_gradf, x, tmp_folder, fixed_embeddings=False, optargs=(), maxiters=500, max_f_eval=500, display=True, xtol=None, ftol=None, gtol=None):
     """
     Optimisation through Gradient Descent
 
@@ -56,23 +81,38 @@ def GD(f, gradf, x, optargs=(), maxiters=500, max_f_eval=500, display=True, xtol
     step_size = 0.01
     mom_size = 0.1
 
-    fnow = f(x, *optargs)
-    lastmove = 0
+    f_gradf = safe_f_and_grad_f(f_and_gradf, x, iteration=0, step_size=0, *optargs)
+    fnow = f_gradf[0]
+    gradnow = f_gradf[1]
+    direction = - gradnow
+    if not fixed_embeddings:
+        local_MapReduce.embeddings_set_grads(tmp_folder)
     
     iteration = 0
     while iteration < maxiters:
-        gradnow = gradf(x, *optargs)
-        xprop = x - step_size * (gradnow + mom_size * lastmove)
-        fproposed = f(xprop, *optargs)
+        xprop = x + step_size * direction
+        f_gradf = safe_f_and_grad_f(f_and_gradf, xprop, iteration=iteration, step_size=step_size, *optargs)
+        fproposed = f_gradf[0]
 
         if (fproposed <= fnow):
             fnow = fproposed
+            gradnow = f_gradf[1]
+            if not fixed_embeddings:
+                local_MapReduce.embeddings_set_grads_update_grad_now(tmp_folder)
             x = xprop
+            if not fixed_embeddings:
+                local_MapReduce.embeddings_set_grads_update_X(tmp_folder, step_size)
+            direction = - (gradnow + mom_size * step_size * direction)
+            #direction = - (gradnow - mom_size * step_size * direction)
+            if not fixed_embeddings:
+                local_MapReduce.embeddings_set_grads_update_d(tmp_folder, mom_size * step_size)
             step_size *= 2.0
-            lastmove = - step_size * (gradnow + mom_size * lastmove)
             iteration += 1
 
-            if (np.max(np.abs(gradnow)) < 10**-6):
+            max_abs_gradnow = np.max(np.abs(gradnow))
+            if not fixed_embeddings:
+                max_abs_gradnow = max(max_abs_gradnow, local_MapReduce.embeddings_get_grads_max_gradnow(tmp_folder))
+            if (max_abs_gradnow < 10**-6):
                 break
                 print 'converged due to grad'
         else:
@@ -80,10 +120,16 @@ def GD(f, gradf, x, optargs=(), maxiters=500, max_f_eval=500, display=True, xtol
 
         if display:
             print ' {0:{mi}s}   {1:11s}    {2:11s}    {3:11s}'.format("I", "F", "Scale", "|g|", mi=len_maxiters)
-            print_out(len_maxiters, display, fnow, np.sum(np.abs(gradnow)), step_size, iteration)
+            current_grad = np.sum(np.abs(gradnow))
+            if not fixed_embeddings:
+                current_grad += local_MapReduce.embeddings_get_grads_current_grad(tmp_folder)
+            print_out(len_maxiters, display, fnow, current_grad, step_size, iteration)
 
 
     if display:
-        print_out(len_maxiters, display, fnow, np.sum(np.abs(gradnow)), step_size, iteration)
+        current_grad = np.sum(np.abs(gradnow))
+        if not fixed_embeddings:
+            current_grad += local_MapReduce.embeddings_get_grads_current_grad(tmp_folder)
+        print_out(len_maxiters, display, fnow, current_grad, step_size, iteration)
         print ""
     return x, None, None, 'converged... NOT'

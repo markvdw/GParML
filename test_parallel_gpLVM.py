@@ -6,7 +6,7 @@ sys.path.append('./tools/')
 import show_embeddings
 import shutil
 
-iterations = 20
+iterations = 100
 
 class empty:
 	pass
@@ -45,7 +45,10 @@ options['iterations'] = 0
 options['load'] = False
 parallel_GPLVM.main(options)
 
-shutil.rmtree('./easydata/embeddings_GPy_init')
+try:
+    shutil.rmtree('./easydata/embeddings_GPy_init')
+except(os.error) as e:
+    pass
 shutil.copytree('./easydata/embeddings', './easydata/embeddings_GPy_init')
 
 print('')
@@ -57,7 +60,7 @@ options['load'] = False
 options['fixed_embeddings'] = False
 parallel_GPLVM.main(options)
 
-#show_embeddings.run(disp_opt, args)
+show_embeddings.run(disp_opt, args)
 
 
 
@@ -66,6 +69,7 @@ parallel_GPLVM.main(options)
 ####################################################################################################################
 import numpy
 import scipy
+#sys.path.append('../GPy-master_20140118')
 import GPy
 gkern = GPy.kern.rbf(options['Q'], 1, numpy.array([1,1]), True)
 

@@ -95,6 +95,7 @@ def run(opt, args):
         fig = plt.figure()
         plt.plot(parGPLVM_X[:, dims[0]], parGPLVM_X[:, dims[1]], 'x')
         pp.savefig(fig)
+        plt.ylim((Y.min(),Y.max()))
         plt.title('First two dimensions of the latent space.')
 
         for dy in opt.output_dimension:

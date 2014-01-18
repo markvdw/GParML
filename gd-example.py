@@ -100,7 +100,8 @@ def main():
     The number of iterations might be greater than max_f_eval
     '''
     #fix_beta = True
-    x = GD(likelihood, gradient, x0, display=True, maxiters=iterations)
+    # We set the flag fixed_embeddings to true because we just need the globals (which now include the embeddings) optimised
+    x = GD(likelihood_and_gradient, x0, './easydata/tmp/', fixed_embeddings=True, display=True, maxiters=iterations)
     #fix_beta = False
     #x = SC(likelihood_and_gradient, x[0], display=True, maxiters=iterations)
     flat_array = x[0]
@@ -111,22 +112,10 @@ def main():
     print 'Final global_statistics'
     print global_statistics
 
-def likelihood(x):
-    try:
-        return  likelihood_and_gradient(x)[0]
-    except (LinAlgError, ZeroDivisionError, ValueError, Warning, AssertionError) as e:
-        return  numpy.inf
-
-def gradient(x):
-    try:
-        return  likelihood_and_gradient(x)[1]
-    except (LinAlgError, ZeroDivisionError, ValueError, Warning, AssertionError) as e:
-        return numpy.ones(x.shape)
-
 '''
 Likelihood and gradient functions
 '''
-def likelihood_and_gradient(flat_array):
+def likelihood_and_gradient(flat_array, iteration=0, step_size=0):
     global Kmm, Kmm_inv, accumulated_statistics, N, Y, flat_global_statistics_bounds, fix_beta, global_statistics_names
     # Transform the parameters that have to be positive to be positive
     flat_array_transformed = numpy.array([transform(b, x) for b, x in zip(flat_global_statistics_bounds, flat_array)])
@@ -217,10 +206,11 @@ def likelihood_and_gradient(flat_array):
 
 
 
-
     ####################################################################################################################
     # Debug comparison to GPy
     ####################################################################################################################
+    '''
+    #sys.path.append('../GPy-master_20140118')
     import GPy
     gkern = GPy.kern.rbf(Q, global_statistics['sf2'].squeeze(), global_statistics['alpha'].squeeze()**-0.5, True)
 
@@ -267,7 +257,7 @@ def likelihood_and_gradient(flat_array):
     #    'X_S' : dF_ds}
     #gradient = flatten_global_statistics(gradient)
     #likelihood = GPy_lml
-
+    '''
 
     gradient = {'Z' : grad_Z,
         'sf2' : grad_sf2,

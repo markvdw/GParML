@@ -296,6 +296,7 @@ def calculate_global_statistics(options, global_statistics, accumulated_statisti
     ####################################################################################################################
     # Debug comparison to GPy
     ####################################################################################################################
+    '''
     import GPy
     gkern = GPy.kern.rbf(options['Q'], global_statistics['sf2'].squeeze(), global_statistics['alpha'].squeeze()**-0.5, True)
 
@@ -395,6 +396,7 @@ def calculate_global_statistics(options, global_statistics, accumulated_statisti
         print '6'
     if not numpy.abs(GPy_lml - partial_derivatives['F']) < 10**-6:
         print '7'
+    '''
 
     return partial_derivatives, accumulated_statistics, partial_terms
 
