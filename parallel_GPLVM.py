@@ -22,7 +22,9 @@ Arguments:
 -t, --tmp
     Shared folder to store tmp files in (default is /scratch/tmp)
 --init
-    Which Initialisation to use (PCA (default), PPCA (probabilistic PCA), FA (factor analysis), random)
+    Which initialisation to use (PCA (default), PPCA (probabilistic PCA), FA (factor analysis), random)
+--optimiser
+    Which optimiser to use (SCG_adapted (adapted scaled gradient descent - default), GD (gradient descent))
 
 Sparse GPs specific options
 -M, --inducing_points
@@ -57,8 +59,8 @@ import random
 import subprocess
 import glob
 import partial_terms as pt
-import scg_adapted
 from scg_adapted import SCG_adapted
+from gd import GD
 import supporting_functions as sp
 
 options = {}
@@ -87,9 +89,11 @@ def main(opt_param = None):
     x0 = flatten_global_statistics(options, global_statistics)
     # Transform the positiv parameters to be in the range (-Inf, Inf)
     x0 = numpy.array([sp.transform_back(b, x) for b, x in zip(options['flat_global_statistics_bounds'], x0)])
-    # Todo: Nothing seems to be done with the end result of the global optimisation?
-    x_opt = SCG_adapted(likelihood_and_gradient, x0, options['embeddings'], options['fixed_embeddings'], display=True, maxiters=options['iterations'])
-    
+    if options['optimiser'] == 'SCG_adapted':
+        x_opt = SCG_adapted(likelihood_and_gradient, x0, options['embeddings'], options['fixed_embeddings'], display=True, maxiters=options['iterations'])
+    elif options['optimiser'] == 'GD':
+        x_opt = GD(likelihood_and_gradient, x0, options['embeddings'], options['fixed_embeddings'], display=True, maxiters=options['iterations'])
+
     flat_array = x_opt[0]
     # Transform the parameters that have to be positive to be positive
     flat_array_transformed = numpy.array([sp.transform(b, x) for b, x in 
@@ -572,7 +576,12 @@ def parse_options():
     parser.add_option("--init",
                        type="choice",
                        choices=["PCA", "PPCA", "FA", "random"], default="PCA",
-                       help="Which Initialisation to use (PCA (default), PPCA (probabilistic PCA), FA (factor analysis), random)"
+                       help="Which initialisation to use (PCA (default), PPCA (probabilistic PCA), FA (factor analysis), random)"
+                      )
+    parser.add_option("--optimiser",
+                       type="choice",
+                       choices=["SCG_adapted", "GD"], default="SCG_adapted",
+                       help="Which optimiser to use (SCG_adapted (adapted scaled gradient descent - default), GD (gradient descent))"
                       )
 
     # Sparse GPs specific options

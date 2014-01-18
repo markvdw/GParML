@@ -35,6 +35,7 @@ options['D'] = 3
 options['keep'] = False
 options['init'] = 'PCA'
 options['fixed_beta'] = False
+options['optimiser'] = 'GD'
 
 filelist = glob.glob("./easydata/embeddings/*")
 for f in filelist:

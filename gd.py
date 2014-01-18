@@ -83,6 +83,7 @@ def GD(f_and_gradf, x, tmp_folder, fixed_embeddings=False, optargs=(), maxiters=
 
     f_gradf = safe_f_and_grad_f(f_and_gradf, x, iteration=0, step_size=0, *optargs)
     fnow = f_gradf[0]
+    flog = [fnow]
     gradnow = f_gradf[1]
     direction = - gradnow
     if not fixed_embeddings:
@@ -96,6 +97,7 @@ def GD(f_and_gradf, x, tmp_folder, fixed_embeddings=False, optargs=(), maxiters=
 
         if (fproposed <= fnow):
             fnow = fproposed
+            flog += [fnow]
             gradnow = f_gradf[1]
             if not fixed_embeddings:
                 local_MapReduce.embeddings_set_grads_update_grad_now(tmp_folder)
@@ -132,4 +134,4 @@ def GD(f_and_gradf, x, tmp_folder, fixed_embeddings=False, optargs=(), maxiters=
             current_grad += local_MapReduce.embeddings_get_grads_current_grad(tmp_folder)
         print_out(len_maxiters, display, fnow, current_grad, step_size, iteration)
         print ""
-    return x, None, None, 'converged... NOT'
+    return x, flog, None, 'converged... NOT'
