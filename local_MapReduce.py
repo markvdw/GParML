@@ -10,6 +10,7 @@ import numpy
 import scipy
 import multiprocessing
 import glob
+import time
 import collections
 import itertools
 '''
@@ -124,8 +125,15 @@ def statistics_MR(options):
     #map_responses = []
     #for arg in arguments:
     #    map_responses.append(statistics_mapper(arg))
-    
-    partitioned_data = partition(itertools.chain(*map_responses))
+
+    # Extract the execution time from the map responses
+    file_names_list = []
+    statistics_mapper_time = []
+    for map_response in map_responses:
+        file_names_list +=  [map_response[0]]
+        statistics_mapper_time += [map_response[1]]
+
+    partitioned_data = partition(itertools.chain(*file_names_list))
     
     arguments = zip(partitioned_data,itertools.repeat(options))
     pool = multiprocessing.Pool(len(input_files))
@@ -135,8 +143,15 @@ def statistics_MR(options):
     #reduced_values = []
     #for arg in arguments:
     #    reduced_values.append(statistics_reducer(arg))
+
+    # Extract the execution time from the reduced values
+    file_names_list = []
+    statistics_reducer_time = []
+    for reduced_value in reduced_values:
+        file_names_list +=  [reduced_value[0]]
+        statistics_reducer_time += [reduced_value[1]]
     
-    return reduced_values
+    return file_names_list, statistics_mapper_time, statistics_reducer_time
 
 def partition(mapped_values):
     '''
@@ -152,6 +167,7 @@ def statistics_mapper((input_file_name, options)):
     '''
     Maps inputs to temp files returning a dictionary of statistics and file names containing them
     '''
+    start = time.time()
     # Load global statistics
     global_statistics = {}
     for key in options['global_statistics_names']:
@@ -209,12 +225,14 @@ def statistics_mapper((input_file_name, options)):
         file_name = tempfile.mktemp(dir=options['tmp'], suffix='.npy')
         save(file_name, accumulated_statistics[key])
         file_names_list.append((key, file_name))
-    return file_names_list
+    end = time.time()
+    return file_names_list, end - start
 
 def statistics_reducer((source_file_name_list, options)):
     '''
     Reduces a list of file names (of a single statistic) to a single file by summing them and deleting the old files
     '''
+    start = time.time()
     statistic = source_file_name_list[0]
     files_names = source_file_name_list[1]
 
@@ -230,7 +248,8 @@ def statistics_reducer((source_file_name_list, options)):
             remove(file_name)
         save(target_file_name, accumulated_statistics)
 
-    return (statistic, target_file_name)
+    end = time.time()
+    return (statistic, target_file_name), end - start
 
 
 '''
@@ -248,14 +267,16 @@ def embeddings_MR(options):
     # Send options to each mapper
     arguments = zip(input_files,itertools.repeat(options))
     pool = multiprocessing.Pool(len(input_files))
-    pool.map(embeddings_mapper, arguments)
+    embeddings_MR_time = pool.map(embeddings_mapper, arguments)
     pool.close()
     pool.join()
     # Code to debug locally because the trace from within the pool is not informative
     #for arg in arguments:
     #    embeddings_mapper(arg)
+    return embeddings_MR_time
     
 def embeddings_mapper((input_file_name, options)):
+    start = time.time()
     global_statistics = {}
     accumulated_statistics = {}
 
@@ -303,6 +324,9 @@ def embeddings_mapper((input_file_name, options)):
     grad_X_S = partial_terms.grad_X_S() * sp.transformVar_grad(X_S_orig)
     local_latest_grad_name = options['embeddings'] + '/' + basename(input_file_name) + '.grad_latest.npy'
     save(local_latest_grad_name, -1 * numpy.array([grad_X_mu, grad_X_S]))
+
+    end = time.time()
+    return end - start
 
 
 '''

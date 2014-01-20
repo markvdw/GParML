@@ -232,9 +232,9 @@ def SCG_adapted(f_and_gradf, x, tmp_folder, fixed_embeddings=False, optargs=(), 
             print fnow
             print 'fold'
             print fold
+
         # Store relevant variables
         flog.append(fnow) # Current function value
-
         iteration += 1
         print_out(len_maxiters, display, fnow, current_grad, beta, iteration)
 
@@ -326,4 +326,4 @@ def SCG_adapted(f_and_gradf, x, tmp_folder, fixed_embeddings=False, optargs=(), 
         print('')
         print(status)
 
-    return x, flog, function_eval, status
+    return x, flog, function_eval, status, local_MapReduce.time_acc

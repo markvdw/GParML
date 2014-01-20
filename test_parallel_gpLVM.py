@@ -6,7 +6,7 @@ sys.path.append('./tools/')
 import show_embeddings
 import shutil
 
-iterations = 100
+iterations = 20
 
 class empty:
 	pass
@@ -35,7 +35,7 @@ options['D'] = 3
 options['keep'] = False
 options['init'] = 'PCA'
 options['fixed_beta'] = False
-options['optimiser'] = 'GD'
+options['optimiser'] = 'SCG_adapted'
 
 filelist = glob.glob("./easydata/embeddings/*")
 for f in filelist:

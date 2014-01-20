@@ -49,24 +49,36 @@ Hadoop specific options
     Jar file for Hadoop streaming
 '''
 from optparse import OptionParser, OptionGroup
+import os
 import os.path
-import sys
 import scipy
 import numpy
+import pickle
+# after importing numpy, reset the CPU affinity of the parent process so
+# that it will use all CPUS
+os.system("taskset -p 0xff %d" % os.getpid())
 from numpy import genfromtxt
 import time
-import random
 import subprocess
 import glob
-import partial_terms as pt
 from scg_adapted import SCG_adapted
 from gd import GD
 import supporting_functions as sp
 
 options = {}
 map_reduce = {}
+# Initialise timing statistics
+time_acc = {
+    'time_acc_statistics_map_reduce' : [],
+    'time_acc_statistics_mapper' : [],
+    'time_acc_statistics_reducer' : [],
+    'time_acc_calculate_global_statistics' : [],
+    'time_acc_embeddings_MR' : [],
+    'time_acc_embeddings_MR_mapper' : []
+}
+
 def main(opt_param = None):
-    global options, map_reduce
+    global options, map_reduce, time_acc
 
     if opt_param is None:
         options = parse_options()
@@ -111,6 +123,12 @@ def main(opt_param = None):
     file_name = options['statistics'] + '/partial_derivatives_F_f.npy'
     ''' We still have a bug where the reported F is not the same one as the one returned from test() '''
     print 'final F=' + str(float(map_reduce.load(file_name)))
+
+    with open(options['statistics'] + '/time_acc.obj', 'wb') as f:
+        pickle.dump(time_acc, f)
+    if options['optimiser'] == 'SCG_adapted':
+        with open(options['statistics'] + '/time_acc_SCG_adapted.obj', 'wb') as f:
+            pickle.dump(x_opt[4], f)
 
 
 def init_statistics(map_reduce, options):
@@ -195,14 +213,14 @@ Calculate the likelihood and derivatives by sending jobs to the nodes
 '''
 
 def likelihood_and_gradient(flat_array, iteration, step_size=0):
-    global options, map_reduce
-    flat_array_transformed = numpy.array([sp.transform(b, x) for b, x in 
+    global options, map_reduce, time_acc
+    flat_array_transformed = numpy.array([sp.transform(b, x) for b, x in
         zip(options['flat_global_statistics_bounds'], flat_array)])
     global_statistics = rebuild_global_statistics(options, flat_array_transformed)
     options['i'] = iteration
     options['step_size'] = step_size
-    print 'global_statistics'
-    print global_statistics
+    #print 'global_statistics'
+    #print global_statistics
 
     # Clear unneeded files from previous iteration if we don't want to keep them. 
     clean(options)
@@ -213,32 +231,40 @@ def likelihood_and_gradient(flat_array, iteration, step_size=0):
         map_reduce.save(file_name, global_statistics[key])
 
     # Dispatch statistics Map-Reduce
-    start = time.time()
+    map_reduce_start = time.time()
     # Cache matrices that only need be calculated once
     map_reduce.cache(options, global_statistics)
-    accumulated_statistics_files = map_reduce.statistics_MR(options)
-    end = time.time()
-    print "Done! statistics Map-Reduce took ", int(end - start), " seconds"
+    accumulated_statistics_files, statistics_mapper_time, statistics_reducer_time = map_reduce.statistics_MR(options)
+    map_reduce_end = time.time()
+    #print "Done! statistics Map-Reduce took ", int(end - start), " seconds"
 
     # Calculate global statistics
-    start = time.time()
+    calculate_global_statistics_start = time.time()
     partial_derivatives, accumulated_statistics, partial_terms = calculate_global_statistics(options,
         global_statistics, accumulated_statistics_files, map_reduce)
-    end = time.time()
-    print "Done! global statistics took ", int(end - start), " seconds"
-
     # Evaluate the gradient for 'Z', 'sf2', 'alpha', and 'beta'
     gradient = calculate_global_derivatives(options, partial_derivatives,
         accumulated_statistics, global_statistics, partial_terms)
+    #print "Done! global statistics took ", int(end - start), " seconds"
+    calculate_global_statistics_end = time.time()
+
     gradient = flatten_global_statistics(options, gradient)
     likelihood = partial_derivatives['F']
 
     if not options['fixed_embeddings']:
         # Dispatch embeddings Map-Reduce if we're not using fixed embeddings
-        start = time.time()
-        map_reduce.embeddings_MR(options)
-        end = time.time()
-        print "Done! embeddings Map-Reduce took ", int(end - start), " seconds"
+        embeddings_MR_start = time.time()
+        embeddings_MR_time = map_reduce.embeddings_MR(options)
+        embeddings_MR_end = time.time()
+        #print "Done! embeddings Map-Reduce took ", int(end - start), " seconds"
+
+    # Collect timing statistics
+    time_acc['time_acc_statistics_map_reduce'] += [map_reduce_end - map_reduce_start]
+    time_acc['time_acc_statistics_mapper'] += [statistics_mapper_time]
+    time_acc['time_acc_statistics_reducer'] += [statistics_reducer_time]
+    time_acc['time_acc_calculate_global_statistics'] += [calculate_global_statistics_end - calculate_global_statistics_start]
+    time_acc['time_acc_embeddings_MR'] += [embeddings_MR_end - embeddings_MR_start]
+    time_acc['time_acc_embeddings_MR_mapper'] += [embeddings_MR_time]
 
     gradient = numpy.array([g * sp.transform_grad(b, x) for b, x, g in 
         zip(options['flat_global_statistics_bounds'], flat_array, gradient)])
@@ -435,8 +461,8 @@ def calculate_global_derivatives(options, partial_derivatives, accumulated_stati
         gradient['beta'] = partial_terms.grad_beta()
     else: 
         gradient['beta'] = numpy.zeros((1,1))
-    print 'gradient'
-    print gradient
+    #print 'gradient'
+    #print gradient
     return gradient
 
 
