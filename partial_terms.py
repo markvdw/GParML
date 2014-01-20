@@ -9,11 +9,6 @@
 import numpy as np
 import numpy.linalg as linalg
 from scipy import constants
-# after importing numpy, reset the CPU affinity of the parent process so
-# that it will use all CPUS
-import os
-os.system("taskset -p 0xff %d" % os.getpid())
-
 import kernels
 import kernel_exp
 

@@ -40,16 +40,10 @@ options['keep'] = True
 options['load'] = False
 options['fixed_beta'] = True
 options['init'] = 'PCA'
-
-#filelist = (glob.glob(path + "/embeddings/*"))
-#for f in filelist:
-#    os.remove(f)
+options['optimiser'] = 'SCG_adapted'
+options['fixed_beta'] = False
 
 import parallel_GPLVM
 reload(parallel_GPLVM)
-parallel_GPLVM.main(options)
 
-options['fixed_beta'] = False
-options['load'] = True
-#options['fixed_embeddings'] = True
 parallel_GPLVM.main(options)

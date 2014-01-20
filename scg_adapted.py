@@ -94,6 +94,9 @@ def SCG_adapted(f_and_gradf, x, tmp_folder, fixed_embeddings=False, optargs=(), 
         gtol = 1e-5
     sigma0 = 1.0e-4
     f_gradf = safe_f_and_grad_f(f_and_gradf, x, iteration=0, step_size=0, *optargs)
+
+    assert f_gradf[0] != float('inf')
+
     fold = f_gradf[0] # Initial function value.
     function_eval = 1
     fnow = fold

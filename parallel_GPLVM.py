@@ -49,14 +49,10 @@ Hadoop specific options
     Jar file for Hadoop streaming
 '''
 from optparse import OptionParser, OptionGroup
-import os
 import os.path
 import scipy
 import numpy
 import pickle
-# after importing numpy, reset the CPU affinity of the parent process so
-# that it will use all CPUS
-os.system("taskset -p 0xff %d" % os.getpid())
 from numpy import genfromtxt
 import time
 import subprocess
@@ -173,8 +169,10 @@ def init_statistics(map_reduce, options):
         # init embeddings using k-means (gives much better guess)
         import scipy.cluster.vq as cl
         Z = cl.kmeans(embeddings, options['M'])[0]
-        while Z.shape[0] < options['M']:
-            Z = cl.kmeans(embeddings, options['M'])[0]
+        # If Z has less than M points:
+        missing = options['M'] - Z.shape[0]
+        if missing > 0:
+            Z = numpy.concatenate((Z, embeddings[:missing]))
         #Z = embeddings[:10]
         Z += scipy.randn(options['M'], options['Q']) * 0.1
 
