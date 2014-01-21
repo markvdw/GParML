@@ -89,19 +89,22 @@ def run(opt, args):
     elif (len(dims) == 1):
         dims.append(np.argmax(alpha))
 
-    pp = PdfPages('easydata.pdf')
+    # pp = PdfPages('easydata.pdf')
     if (opt.plot2d):
         # Plot the X
         fig = plt.figure()
         plt.plot(parGPLVM_X[:, dims[0]], parGPLVM_X[:, dims[1]], 'x')
-        pp.savefig(fig)
-        plt.ylim((Y.min(),Y.max()))
+        # pp.savefig(fig)
+        # plt.ylim((Y.min(),Y.max()))
         plt.title('First two dimensions of the latent space.')
 
         for dy in opt.output_dimension:
             fig = plt.figure()
             plt.plot(parGPLVM_X[:, dims[0]], Y[:, dy], 'x')
             plt.title('First latent space dim vs data %i' % dy)
+
+    if (opt.plotard):
+        fig = plt.figure()
 
 
     # Plot the outputs as a func of the X
@@ -115,7 +118,7 @@ def run(opt, args):
     #         ax.set_zlabel('Data dim %u' % dy)
     #         pp.savefig(fig)
 
-    pp.close()
+    # pp.close()
 
     if (opt.plot3d):
         vprint('3D plotting not implemented yet.')

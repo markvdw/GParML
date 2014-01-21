@@ -98,7 +98,7 @@ def main(opt_param = None):
     # Transform the positiv parameters to be in the range (-Inf, Inf)
     x0 = numpy.array([sp.transform_back(b, x) for b, x in zip(options['flat_global_statistics_bounds'], x0)])
     if options['optimiser'] == 'SCG_adapted':
-        x_opt = SCG_adapted(likelihood_and_gradient, x0, options['embeddings'], options['fixed_embeddings'], display=True, maxiters=options['iterations'])
+        x_opt = SCG_adapted(likelihood_and_gradient, x0, options['embeddings'], options['fixed_embeddings'], display=True, maxiters=options['iterations'], xtol=0, ftol=0, gtol=0)
     elif options['optimiser'] == 'GD':
         x_opt = GD(likelihood_and_gradient, x0, options['embeddings'], options['fixed_embeddings'], display=True, maxiters=options['iterations'])
 
@@ -174,7 +174,7 @@ def init_statistics(map_reduce, options):
         if missing > 0:
             Z = numpy.concatenate((Z, embeddings[:missing]))
         #Z = embeddings[:10]
-        Z += scipy.randn(options['M'], options['Q']) * 0.1
+        Z += scipy.randn(options['M'], options['Q']) * 0.05
 
         # Initialise the global statistics
         global_statistics = {
