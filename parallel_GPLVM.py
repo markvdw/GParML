@@ -498,79 +498,7 @@ def clean(options):
             file_name = options['statistics'] + '/cache_' + key + '_' + str(options['i']) + '.npy'
             map_reduce.remove(file_name)
 
-def test(options, Y_test, is_random_init=False, iterations=10):
-    ''' Return mean and variance for test points given a trained model in 'options' '''
-    ''' Init the mean variance '''
-    if is_random_init:
-        X_mu = scipy.randn(Y_test.shape[0], options['Q'])
-    else:
-        import scipy.spatial
-        file_names = glob.glob(options['input'] + '/*')
-        Y_dists = [numpy.inf for i in xrange(Y_test.shape[0])]
-        X_mu = numpy.zeros((Y_test.shape[0], options['Q']))
-        for file_name in file_names:
-            Y = genfromtxt(file_name, delimiter=',')
-            embedding_name = options['embeddings'] + '/' + os.path.basename(file_name) + '.embedding.npy'
-            X = scipy.load(embedding_name)
 
-            tree = scipy.spatial.cKDTree(Y,leafsize=100)
-            (dist, ind) = tree.query(Y_test, k=1, distance_upper_bound=6)
-
-            for i in xrange(X_mu.shape[0]):
-                if dist[i] < Y_dists[i]:
-                    Y_dists[i] = dist[i]
-                    X_mu[i, :] = X[ind[i], :]
-    X_S = numpy.clip(numpy.ones((Y_test.shape[0], options['Q'])) * 0.5
-                        + 0.01 * scipy.randn(Y_test.shape[0], options['Q']),
-                0.001, 1)
-
-    ''' Optimise over these values '''
-    import local_MapReduce
-    options['load'] = True
-    options, global_statistics = init_statistics(local_MapReduce, options)
-    options['i'] = 'f'
-    accumulated_statistics = {}
-    for key in options['accumulated_statistics_names']:
-        file_name = options['statistics'] + '/accumulated_statistics_' + key + '_' + str(options['i']) + '.npy'
-        accumulated_statistics[key] = local_MapReduce.load(file_name)
-
-    # Calculate partial statistics...
-    partial_terms = local_MapReduce.load_partial_terms(options, global_statistics)
-    # Load cached matrices
-    local_MapReduce.load_cache(options, partial_terms)
-
-    partial_terms.set_data(Y_test, X_mu, X_S, is_set_statistics=False)
-
-    ''' Get local statistics for new data points '''
-    partial_terms_local = local_MapReduce.load_partial_terms(options, global_statistics)
-    local_MapReduce.load_cache(options, partial_terms_local)
-    partial_terms_local.set_data(Y_test, X_mu, X_S, is_set_statistics=True)
-    new_local_statistics = partial_terms_local.get_local_statistics()
-
-    partial_terms.set_local_statistics(accumulated_statistics['sum_YYT'] + new_local_statistics['sum_YYT'],
-        accumulated_statistics['sum_exp_K_mi_K_im'] + new_local_statistics['sum_exp_K_mi_K_im'],
-        accumulated_statistics['sum_exp_K_miY'] + new_local_statistics['exp_K_miY'],
-        accumulated_statistics['sum_exp_K_ii'] + new_local_statistics['exp_K_ii'],
-        accumulated_statistics['sum_KL'] + new_local_statistics['KL'])
-
-    # Actual optimisation of the embeddings
-    for i in xrange(iterations):
-        (X_mu, X_S) = partial_terms.local_optimisation()
-
-        partial_terms.set_data(Y_test, X_mu, X_S, is_set_statistics=False)
-
-        ''' Get local statistics for new data points '''
-        partial_terms_local.set_data(Y_test, X_mu, X_S, is_set_statistics=True)
-        new_local_statistics = partial_terms_local.get_local_statistics()
-
-        partial_terms.set_local_statistics(accumulated_statistics['sum_YYT'] + new_local_statistics['sum_YYT'],
-            accumulated_statistics['sum_exp_K_mi_K_im'] + new_local_statistics['sum_exp_K_mi_K_im'],
-            accumulated_statistics['sum_exp_K_miY'] + new_local_statistics['exp_K_miY'],
-            accumulated_statistics['sum_exp_K_ii'] + new_local_statistics['exp_K_ii'],
-            accumulated_statistics['sum_KL'] + new_local_statistics['KL'])
-        ''' BUG IN THE IMPLEMENTATION: set_data changes sum_YYT '''
-
-    return [X_mu, X_S, partial_terms.logmarglik()]
 
 '''
 Parse options[' Not interesting at all.
