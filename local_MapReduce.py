@@ -13,6 +13,7 @@ import glob
 import time
 import collections
 import itertools
+import random
 '''
 To Do: we currently have a bug where if an input file is one-dimensional, it will be read as
 a single row array
@@ -115,6 +116,12 @@ def statistics_MR(options):
     Gets as input options and statistics to use in accumulation; returns as output partial sums. Writes files to /tmp/ to pass information between different nodes.
     '''
     input_files = sorted(glob.glob(options['input'] + '/*'))
+    # Dropout drop_out_fraction of the nodes
+    if 'drop_out_fraction' in options and options['drop_out_fraction'] > 0:
+        ind = random.sample(range(len(input_files)), int((1 - options['drop_out_fraction']) * len(input_files)))
+        if len(ind) == 0:
+            ind = [random.randint(0, len(input_files))]
+        input_files = [input_files[i] for i in ind]
     # Send both input_file_name and options to each mapper
     arguments = zip(input_files,itertools.repeat(options))
     pool = multiprocessing.Pool(len(input_files))
@@ -264,6 +271,12 @@ def embeddings_MR(options):
     '''
 
     input_files = sorted(glob.glob(options['input'] + '/*'))
+    # Dropout drop_out_fraction of the nodes
+    if 'drop_out_fraction' in options and options['drop_out_fraction'] > 0:
+        ind = random.sample(range(len(input_files)), int((1 - options['drop_out_fraction']) * len(input_files)))
+        if len(ind) == 0:
+            ind = [random.randint(0, len(input_files))]
+        input_files = [input_files[i] for i in ind]
     # Send options to each mapper
     arguments = zip(input_files,itertools.repeat(options))
     pool = multiprocessing.Pool(len(input_files))

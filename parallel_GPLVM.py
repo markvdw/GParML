@@ -25,6 +25,8 @@ Arguments:
     Which initialisation to use (PCA (default), PPCA (probabilistic PCA), FA (factor analysis), random)
 --optimiser
     Which optimiser to use (SCG_adapted (adapted scaled gradient descent - default), GD (gradient descent))
+--drop_out_fraction
+    Fraction of nodes to drop out  (default: 0)
 
 Sparse GPs specific options
 -M, --inducing_points
@@ -535,6 +537,8 @@ def parse_options():
                        choices=["SCG_adapted", "GD"], default="SCG_adapted",
                        help="Which optimiser to use (SCG_adapted (adapted scaled gradient descent - default), GD (gradient descent))"
                       )
+    parser.add_option("--drop_out_fraction", type=float, dest="drop_out_fraction",
+                  help="Fraction of nodes to drop out  (default: 0)", default=0)
 
     # Sparse GPs specific options
     SparseGPs_group = OptionGroup(parser, "Sparse GPs Options")
