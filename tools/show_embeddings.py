@@ -105,7 +105,8 @@ def run(opt, args):
 
     if (opt.plotard):
         fig = plt.figure()
-
+        print alpha
+        plt.bar(range(len(alpha)), alpha)
 
     # Plot the outputs as a func of the X
     # if (not opt.output_dimension is None):
@@ -125,7 +126,7 @@ def run(opt, args):
 
     plt.show()
 
-    return parGPLVM_X
+    return (parGPLVM_X, alpha)
 
 if __name__ == '__main__':
     usage = "usage: %prog [options] data_dir"
