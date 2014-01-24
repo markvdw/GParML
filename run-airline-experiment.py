@@ -36,6 +36,12 @@ output = np.array(Y['ArrDelay'])[items]
 perm = split_data.split_data(outputs, P, path, dname)
 split_data.split_embeddings(inputs, P, path, dname, perm)
 
+# Normalise data
+inputs = inputs - np.mean(inputs)
+inputs = inputs / np.std(inputs)
+output = output - np.mean(output)
+output = output / np.std(output)
+
 # Run the Parallel GPLVM
 options = {}
 options['input'] = path + '/inputs/'
