@@ -14,18 +14,27 @@ num_inducing = 40
 path = './flight/'
 dname = 'flight'
 
+# 'Year', 'Month', 'DayofMonth', 'DayOfWeek', 'DepTime', 'ArrTime', 'ArrDelay', 'AirTime', 'Distance', 'plane_age'
+
 # First delete all current inputs & embeddings
 split_data.clean_dir(path)
-
-# Load data
-Y = np.loadtxt(path + '/proc/flight', delimiter=',')
-split_data.split_data(Y, P, path, dname)
 
 # Prepare directories
 reqdirs = ['inputs', 'embeddings', 'tmp', 'proc']
 for dirname in reqdirs:
     if not os.path.exists(path + '/' + dirname):
         os.mkdir(path + '/' + dirname)
+
+# Load data
+Y = cPickle.load(open('./flight/proc/filtered_data.pickle'))
+
+items = np.random.permutation(Y.shape[0])[:800000]
+
+inputs = np.array(Y[['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'DepTime', 'ArrTime', 'AirTime', 'Distance', 'plane_age']])[items][:]
+output = np.array(Y['ArrDelay'])[items]
+
+perm = split_data.split_data(outputs, P, path, dname)
+split_data.split_embeddings(inputs, P, path, dname, perm)
 
 # Run the Parallel GPLVM
 options = {}
@@ -37,11 +46,10 @@ options['statistics'] = path + '/tmp'
 options['tmp'] = path + '/tmp'
 options['M'] = num_inducing
 options['Q'] = Q
-options['D'] = 12
-options['fixed_embeddings'] = False
+options['D'] = 1
+options['fixed_embeddings'] = True
 options['keep'] = False
-options['load'] = False
-options['fixed_beta'] = True
+options['load'] = True
 options['init'] = 'PCA'
 options['optimiser'] = 'SCG_adapted'
 options['fixed_beta'] = False
