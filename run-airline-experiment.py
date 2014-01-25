@@ -9,9 +9,12 @@ import numpy as np
 import tools.split_data as split_data
 import parallel_GPLVM
 
+print('Starting...')
+
+N = 700
 P = 60
 Q = 9
-num_inducing = 1000
+num_inducing = min(900, N)
 path = './flight/'
 dname = 'flight'
 
@@ -27,17 +30,24 @@ for dirname in reqdirs:
         os.mkdir(path + '/' + dirname)
 
 # Load data
+print('Loading data...')
 Y = np.load('./flight/proc/flight_regression_output.npy')
 X = np.load('./flight/proc/flight_regression_inputs.npy')
 
-perm = split_data.split_data(Y, P, path, dname)
-split_data.split_embeddings(X, P, path, dname, perm)
-
 # Normalise data
-inputs = inputs - np.mean(inputs)
-inputs = inputs / np.std(inputs)
-output = output - np.mean(output)
-output = output / np.std(output)
+X = X - np.mean(X)
+X = X / np.std(X)
+Y = Y - np.mean(Y)
+Y = Y / np.std(Y)
+
+print('Embeddings shape:')
+print(X.shape)
+print('Data shape:')
+print(Y.shape)
+
+print('Splitting data...')
+perm = split_data.split_data(Y[:N], P, path, dname)
+split_data.split_embeddings(X[:N], P, path, dname, perm=perm)
 
 # Run the Parallel GPLVM
 options = {}
@@ -52,11 +62,12 @@ options['Q'] = Q
 options['D'] = 1
 options['fixed_embeddings'] = True
 options['keep'] = False
-options['load'] = True
+options['load'] = False
 options['init'] = 'PCA'
 options['optimiser'] = 'SCG_adapted'
 options['fixed_beta'] = False
 
+print('Running...')
 parallel_GPLVM.main(options)
 
 # Copy output directory

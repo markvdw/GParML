@@ -51,6 +51,8 @@ def test(options_, Y_test_, mask=None, is_random_init=False, random_iterations=1
         X_mu = numpy.zeros(shape)
         for file_name in file_names:
             Y = numpy.genfromtxt(file_name, delimiter=',')
+            if (len(Y.shape) == 1):
+                Y = numpy.atleast_2d(Y).T
             embedding_name = options['embeddings'] + '/' + os.path.basename(file_name) + '.embedding.npy'
             X = scipy.load(embedding_name)
 

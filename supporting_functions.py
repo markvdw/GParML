@@ -11,6 +11,8 @@ def linear_dim_reduction(options, input_files_names):
     for file_name in input_files_names:
         input_file = options['input'] + '/' + file_name
         Y = genfromtxt(input_file, delimiter=',')
+        if (len(Y.shape) == 1):
+            Y = numpy.atleast_2d(Y).T
         mean += Y.sum(axis=0)
     mean /= options['N']
 
@@ -19,6 +21,8 @@ def linear_dim_reduction(options, input_files_names):
     for file_name in input_files_names:
         input_file = options['input'] + '/' + file_name
         Y = genfromtxt(input_file, delimiter=',')
+        if (len(Y.shape) == 1):
+            Y = numpy.atleast_2d(Y).T
         S += (Y.T - mean[:, None]).dot(Y - mean[None, :])
     S /= options['N']
 
@@ -76,6 +80,8 @@ def FA_collect_statistics(Y, options, input_files_names):
 
 def PPCA(options, Y_name, W, sigma2, mean):
     Y = genfromtxt(Y_name, delimiter=',')
+    if (len(Y.shape) == 1):
+        Y = numpy.atleast_2d(Y).T
     Minv = numpy.linalg.inv(sigma2 * numpy.eye(options['Q']) + W.T.dot(W))
     X = (Minv.dot(W.T).dot(Y.T - mean[:, None])).T
     v = X.std(axis=0)
@@ -84,6 +90,8 @@ def PPCA(options, Y_name, W, sigma2, mean):
 
 def FA(options, Y_name, W, Psi, mean):
     Y = genfromtxt(Y_name, delimiter=',')
+    if (len(Y.shape) == 1):
+        Y = numpy.atleast_2d(Y).T
     Psi_inv = numpy.linalg.inv(numpy.diag(Psi))
     Sigma = numpy.linalg.inv(numpy.eye(options['Q']) + W.T.dot(Psi_inv).dot(W))
     X = (Sigma.dot(W.T).dot(Psi_inv).dot(Y.T - mean[:, None])).T

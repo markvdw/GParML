@@ -14,10 +14,6 @@ import time
 import collections
 import itertools
 import random
-'''
-To Do: we currently have a bug where if an input file is one-dimensional, it will be read as
-a single row array
-'''
 from numpy import genfromtxt
 import kernels
 import numpy.linalg as linalg
@@ -62,6 +58,8 @@ def init(options):
             for file_name in input_files_names[1:]:
                 input_file = options['input'] + '/' + file_name
                 Y = numpy.concatenate((Y, genfromtxt(input_file, delimiter=',')))
+            if (len(Y.shape) == 1):
+                Y = numpy.atleast_2d(Y).T
             if options['init'] == 'PCA':
                 # Collect statistics for PCA initialisation 
                 X = sp.PCA(Y, options['Q'])
@@ -129,8 +127,8 @@ def statistics_MR(options):
     pool.close()
     pool.join()
     # Code to debug locally because the trace from within the pool is not informative
-    #map_responses = []
-    #for arg in arguments:
+    # map_responses = []
+    # for arg in arguments:
     #    map_responses.append(statistics_mapper(arg))
 
     # Extract the execution time from the map responses
@@ -147,8 +145,8 @@ def statistics_MR(options):
     reduced_values = pool.map(statistics_reducer, arguments)
     pool.close()
     pool.join()
-    #reduced_values = []
-    #for arg in arguments:
+    # reduced_values = []
+    # for arg in arguments:
     #    reduced_values.append(statistics_reducer(arg))
 
     # Extract the execution time from the reduced values
@@ -185,6 +183,8 @@ def statistics_mapper((input_file_name, options)):
     embedding_name = options['embeddings'] + '/' + basename(input_file_name) + '.embedding.npy'
     embedding_variance_name = options['embeddings'] + '/' + basename(input_file_name) + '.variance.npy'
     Y = genfromtxt(input_file_name, delimiter=',')# os.path.join(INPUT_DIR,filename)
+    if (len(Y.shape) == 1):
+        Y = numpy.atleast_2d(Y).T
     X_mu = load(embedding_name)
     X_S = load(embedding_variance_name)
 
@@ -304,6 +304,8 @@ def embeddings_mapper((input_file_name, options)):
     embedding_name = options['embeddings'] + '/' + basename(input_file_name) + '.embedding.npy'
     embedding_variance_name = options['embeddings'] + '/' + basename(input_file_name) + '.variance.npy'
     Y = genfromtxt(input_file_name, delimiter=',')# os.path.join(INPUT_DIR,filename)
+    if (len(Y.shape) == 1):
+        Y = numpy.atleast_2d(Y).T
     X_mu = load(embedding_name)
     X_S_orig = load(embedding_variance_name)
 

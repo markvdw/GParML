@@ -46,8 +46,8 @@ def split_embeddings(X, P, path, dname, init_variance=0.0, perm=None):
     for p in xrange(1, P+1):
         name = path + '/embeddings/' + dname + '_' + str(p) + '.embedding.npy'
         var_name = path + '/embeddings/' + dname + '_' + str(p) + '.variance.npy'
-        x = X[perm % P, :]
+        x = X[(perm % P) == (p - 1), :]
         np.save(name, x)
-        np.save(var_name, np.zeros(N, Q))
+        np.save(var_name, np.ones((N, Q)) * init_variance)
 
     return perm
