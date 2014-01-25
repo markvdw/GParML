@@ -263,8 +263,9 @@ def likelihood_and_gradient(flat_array, iteration, step_size=0):
     time_acc['time_acc_statistics_mapper'] += [statistics_mapper_time]
     time_acc['time_acc_statistics_reducer'] += [statistics_reducer_time]
     time_acc['time_acc_calculate_global_statistics'] += [calculate_global_statistics_end - calculate_global_statistics_start]
-    time_acc['time_acc_embeddings_MR'] += [embeddings_MR_end - embeddings_MR_start]
-    time_acc['time_acc_embeddings_MR_mapper'] += [embeddings_MR_time]
+    if not options['fixed_embeddings']:
+        time_acc['time_acc_embeddings_MR'] += [embeddings_MR_end - embeddings_MR_start]
+        time_acc['time_acc_embeddings_MR_mapper'] += [embeddings_MR_time]
 
     gradient = numpy.array([g * sp.transform_grad(b, x) for b, x, g in 
         zip(options['flat_global_statistics_bounds'], flat_array, gradient)])
@@ -539,6 +540,8 @@ def parse_options():
                       )
     parser.add_option("--drop_out_fraction", type=float, dest="drop_out_fraction",
                   help="Fraction of nodes to drop out  (default: 0)", default=0)
+
+    parser.add_option("--local-no-pool", action="store_true", dest="local_no_pool", default=False, help="When using local_MapReduce, do not do any parallelisation.")
 
     # Sparse GPs specific options
     SparseGPs_group = OptionGroup(parser, "Sparse GPs Options")
