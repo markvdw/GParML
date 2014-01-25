@@ -33,6 +33,12 @@ X = np.load('./flight/proc/flight_regression_inputs.npy')
 perm = split_data.split_data(Y, P, path, dname)
 split_data.split_embeddings(X, P, path, dname, perm)
 
+# Normalise data
+inputs = inputs - np.mean(inputs)
+inputs = inputs / np.std(inputs)
+output = output - np.mean(output)
+output = output / np.std(output)
+
 # Run the Parallel GPLVM
 options = {}
 options['input'] = path + '/inputs/'
