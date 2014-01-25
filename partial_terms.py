@@ -235,14 +235,20 @@ class partial_terms(object):
         # print(time.time() - t)
 
         # t = time.time()
-        res2 = np.sum( self.exp_K_mi_K_im[:, :, None, :] *
+        # res2 = np.sum( self.exp_K_mi_K_im[:, :, None, :] *
+        #                (-0.5*alpha[None, :, None]*(self.Z[:, :, None] - self.Z.T[None, :, :]) +
+        #                 0.5*alpha[None, :, None]*(2.*self.X_mu[:, None, :, None] - self.Z[:, :, None] - self.Z.T[None, :, :])/(2.*alpha[None, :, None]*self.X_S[:, None, :, None] + 1)) , 0)
+
+        res = np.zeros((self.M, self.Q, self.M))
+        for i in xrange(self.local_N):
+            res += (self.exp_K_mi_K_im[i, :, None, :] *
                        (-0.5*alpha[None, :, None]*(self.Z[:, :, None] - self.Z.T[None, :, :]) +
-                        0.5*alpha[None, :, None]*(2.*self.X_mu[:, None, :, None] - self.Z[:, :, None] - self.Z.T[None, :, :])/(2.*alpha[None, :, None]*self.X_S[:, None, :, None] + 1)) , 0)
+                        0.5*alpha[None, :, None]*(2.*self.X_mu[i, None, :, None] - self.Z[:, :, None] - self.Z.T[None, :, :])/(2.*alpha[None, :, None]*self.X_S[i, None, :, None] + 1)))
         # print(time.time() - t)
 
         # assert np.sum(np.abs(res - res2)) < 10**-13
 
-        return res2
+        return res
 
     def grad_Z(self, dF_dKmm, dKmm_dZ, dF_dexp_K_miY, dexp_K_miY_dZ, dF_dexp_K_mi_K_im, dexp_K_mi_K_im_dZ):
         # I think we need individual kernel_exp matrices here... So don't pass them
@@ -301,14 +307,17 @@ class partial_terms(object):
         for q in xrange(self.Q):
             for i in xrange(self.local_N):
                 alphaS = alpha * self.X_S[i, :]
-                # Correct by comparison to GPy:
+                # Correct by comparison to GPy:()
                 v = -0.5 * self.exp_K_mi[i, :] * (((self.X_mu[i, q] - self.Z[:, q]) / (alphaS[q] + 1.0))**2.0 + self.X_S[i, q] / (alphaS[q] + 1.0))
                 dexp_K_miY_dalpha[q, :, :] += np.outer(v, self.Y[i, :])
+
+        # a_s = alpha[None, :, None, None] * self.X_S[:, :, None, None]
+        # res = np.sum((-0.5 * self.exp_K_mi[:, None, :, None] * (((self.X_mu[:, :, None, None] - self.Z.T[None, :, :, None] / (a_s + 1.0))**2.0 + self.X_S[:, :, None, None] / a_s))) * self.Y[:, None, None, :], 0)
 
         return dexp_K_miY_dalpha
 
     def dexp_K_mi_K_im_dalpha(self):
-        import time
+        # import time
         alpha = self.hyp.ard**-2
 
         # Eqn (5.61)
@@ -330,16 +339,23 @@ class partial_terms(object):
 
         # Test alternative calculation
         # timec = time.time()
-        dexp_K_mi_K_im_dalpha = np.sum(self.exp_K_mi_K_im[:, None, :, :] * (
+        # dexp_K_mi_K_im_dalpha = np.sum(self.exp_K_mi_K_im[:, None, :, :] * (
+        #             (-0.25*np.rollaxis(self.Z[:, None, :] - self.Z[:, :], 2)**2) +
+        #             -0.25*np.rollaxis((2.*self.X_mu[:, None, None, :] - self.Z[:, None, :] - self.Z[:, :]) / (2.*alpha[None, None, :]*self.X_S[:, None, None, :] + 1.), 3, 1)**2
+        #             -np.rollaxis(self.X_S[:, None, None, :] / (2.*alpha[:]*self.X_S[:, None, None, :] + 1.), 3, 1)), 0)
+
+        res = np.zeros((self.Q, self.M, self.M))
+        for i in xrange(self.local_N):
+            res += (self.exp_K_mi_K_im[i, None, :, :] * (
                     (-0.25*np.rollaxis(self.Z[:, None, :] - self.Z[:, :], 2)**2) +
-                    -0.25*np.rollaxis((2.*self.X_mu[:, None, None, :] - self.Z[:, None, :] - self.Z[:, :]) / (2.*alpha[None, None, :]*self.X_S[:, None, None, :] + 1.), 3, 1)**2
-                    -np.rollaxis(self.X_S[:, None, None, :] / (2.*alpha[:]*self.X_S[0, None, None, :] + 1.), 3, 1)), 0)
+                    -0.25*np.rollaxis((2.*self.X_mu[i, None, None, :] - self.Z[:, None, :] - self.Z[:, :]) / (2.*alpha[None, None, :]*self.X_S[i, None, None, :] + 1.), 2, 0)**2
+                    -np.rollaxis(self.X_S[i, None, None, :] / (2.*alpha[:]*self.X_S[i, None, None, :] + 1.), 2, 0)))
         # print (time.time() - timec)
 
         # print (a.shape)
         # print np.sum(np.abs(a - dexp_K_mi_K_im_dalpha))
 
-        return dexp_K_mi_K_im_dalpha
+        return res
 
     def grad_alpha(self, dF_dKmm, dKmm_dalpha, dF_dexp_K_miY, dexp_K_miY_dalpha, dF_dexp_K_mi_K_im, dexp_K_mi_K_im_dalpha):
         # dF_dalpha = dF_dKmm (5.7) * dKmm_dalpha (5.58) +

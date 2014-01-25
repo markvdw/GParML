@@ -48,7 +48,7 @@ options['init'] = 'PCA'
 options['optimiser'] = 'SCG_adapted'
 options['fixed_beta'] = False
 
-options['local_no_pool'] = True
+options['local_no_pool'] = False
 
 parallel_GPLVM.main(options)
 
