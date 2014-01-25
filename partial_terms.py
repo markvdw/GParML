@@ -157,14 +157,24 @@ class partial_terms(object):
         '''
         alpha = 1.0 / self.hyp.ard**2
 
-        res = np.zeros((self.M, self.Q, self.M))
-        for j in xrange(self.M):
-            for k in xrange(self.Q):
-                for mp in xrange(self.M):
-                    res[j, k, mp] = self.kernel.K(self.Z[j, :], self.Z[mp, :])
-                    res[j, k, mp] *= -alpha[k]*(self.Z[j, k] - self.Z[mp, k])
+        # import time
+        # t = time.time()
+        # res = np.zeros((self.M, self.Q, self.M))
+        # for j in xrange(self.M):
+        #     for k in xrange(self.Q):
+        #         for mp in xrange(self.M):
+        #             res[j, k, mp] = self.kernel.K(self.Z[j, :], self.Z[mp, :])
+        #             res[j, k, mp] *= -alpha[k]*(self.Z[j, k] - self.Z[mp, k])
+        # print time.time() - t
 
-        return res
+        # t = time.time()
+        K = self.kernel.K(self.Z, self.Z)
+        res2 = K[:, None, :] * -alpha[None, :, None] * (self.Z[:, :, None] - self.Z.T[None, :, :])
+        # print time.time() - t
+
+        # assert np.sum(np.abs(res2 - res)) < 10**-12
+
+        return res2
 
     def dexp_K_miY_dZ(self):
         '''
