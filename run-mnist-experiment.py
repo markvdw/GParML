@@ -11,10 +11,16 @@ import tools.split_data as split_data
 import parallel_GPLVM
 
 P = 60
-Q = 20
-num_inducing = 100
+Q = 40
+num_inducing = 41
 path = './mnist/'
 dname = 'mnist'
+
+# Prepare directories
+reqdirs = ['inputs', 'embeddings', 'tmp', 'proc']
+for dirname in reqdirs:
+    if not os.path.exists(path + '/' + dirname):
+        os.mkdir(path + '/' + dirname)
 
 # First delete all current inputs & embeddings
 split_data.clean_dir(path)
@@ -27,12 +33,6 @@ f.close()
 Y = train_set[0][:N, :]
 
 split_data.split_data(Y, P, path, dname)
-
-# Prepare directories
-reqdirs = ['inputs', 'embeddings', 'tmp', 'proc']
-for dirname in reqdirs:
-    if not os.path.exists(path + '/' + dirname):
-        os.mkdir(path + '/' + dirname)
 
 # Run the Parallel GPLVM
 options = {}

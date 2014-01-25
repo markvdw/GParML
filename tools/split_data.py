@@ -33,7 +33,7 @@ def split_data(Y, P, path, dname):
     return perm
 
 
-def split_embeddings(X, P, path, dname, init_variance=0.0 perm=None):
+def split_embeddings(X, P, path, dname, init_variance=0.0, perm=None):
     '''
     split_embeddings
     Splits the embeddings and distributes into several different files.
@@ -46,7 +46,7 @@ def split_embeddings(X, P, path, dname, init_variance=0.0 perm=None):
     for p in xrange(1, P+1):
         name = path + '/embeddings/' + dname + '_' + str(p) + '.embedding.npy'
         var_name = path + '/embeddings/' + dname + '_' + str(p) + '.variance.npy'
-        x = X[idx % P, :]
+        x = X[perm % P, :]
         np.save(name, x)
         np.save(var_name, np.zeros(N, Q))
 

@@ -2,15 +2,16 @@ import os
 import glob
 import shutil
 import time
+import cPickle
 
 import numpy as np
 
 import tools.split_data as split_data
 import parallel_GPLVM
 
-P = 10
-Q = 7
-num_inducing = 40
+P = 60
+Q = 9
+num_inducing = 1000
 path = './flight/'
 dname = 'flight'
 
@@ -26,15 +27,11 @@ for dirname in reqdirs:
         os.mkdir(path + '/' + dirname)
 
 # Load data
-Y = cPickle.load(open('./flight/proc/filtered_data.pickle'))
+Y = np.load('./flight/proc/flight_regression_output.npy')
+X = np.load('./flight/proc/flight_regression_inputs.npy')
 
-items = np.random.permutation(Y.shape[0])[:800000]
-
-inputs = np.array(Y[['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'DepTime', 'ArrTime', 'AirTime', 'Distance', 'plane_age']])[items][:]
-output = np.array(Y['ArrDelay'])[items]
-
-perm = split_data.split_data(outputs, P, path, dname)
-split_data.split_embeddings(inputs, P, path, dname, perm)
+perm = split_data.split_data(Y, P, path, dname)
+split_data.split_embeddings(X, P, path, dname, perm)
 
 # Run the Parallel GPLVM
 options = {}

@@ -19,7 +19,7 @@ split_data.clean_dir(path)
 
 # Load data
 Y = np.loadtxt(path + '/proc/easy', delimiter=',')
-split_data.split_data(Y, P, path, dname)
+split_data.split_data(Y[:N, :], P, path, dname)
 
 # Prepare directories
 reqdirs = ['inputs', 'embeddings', 'tmp', 'proc']
@@ -32,7 +32,7 @@ options = {}
 options['input'] = path + '/inputs/'
 options['embeddings'] = path + '/embeddings/'
 options['parallel'] = 'local'
-options['iterations'] = 200
+options['iterations'] = 50
 options['statistics'] = path + '/tmp'
 options['tmp'] = path + '/tmp'
 options['M'] = num_inducing
@@ -46,7 +46,10 @@ options['init'] = 'PCA'
 options['optimiser'] = 'SCG_adapted'
 options['fixed_beta'] = False
 
+start_time = time.time()
 parallel_GPLVM.main(options)
+print('Elapsed time:')
+print(time.time() - start_time)
 
 # Copy output directory
 shutil.copytree(path, '/scratch/mv310/results/' + dname + str(time.time()))
