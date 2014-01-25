@@ -220,17 +220,29 @@ class partial_terms(object):
         '''
         alpha = self.hyp.ard**-2
 
-        res = np.zeros((self.M, self.Q, self.M))
-        # Need to sum over all input points
-        for n, (mu, s) in enumerate(zip(self.X_mu, self.X_S)):
-            # Now calculate each element of the output
-            for j in xrange(self.M):
-                for k in xrange(self.Q):
-                    res[j, k, :] += (self.exp_K_mi_K_im[n, j, :] *
-                                     (-0.5*alpha[k]*(self.Z[j, k] - self.Z[:, k]) +
-                                       0.5*alpha[k]*(2*mu[k] - self.Z[j, k] - self.Z[:, k])/(2*alpha[k]*s[k] + 1) ))
+        # import time
+        #
+        # t = time.time()
+        # res = np.zeros((self.M, self.Q, self.M))
+        # # Need to sum over all input points
+        # for n, (mu, s) in enumerate(zip(self.X_mu, self.X_S)):
+        #     # Now calculate each element of the output
+        #     for j in xrange(self.M):
+        #         for k in xrange(self.Q):
+        #             res[j, k, :] += (self.exp_K_mi_K_im[n, j, :] *
+        #                              (-0.5*alpha[k]*(self.Z[j, k] - self.Z[:, k]) +
+        #                                0.5*alpha[k]*(2*mu[k] - self.Z[j, k] - self.Z[:, k])/(2*alpha[k]*s[k] + 1) ))
+        # print(time.time() - t)
 
-        return res
+        # t = time.time()
+        res2 = np.sum( self.exp_K_mi_K_im[:, :, None, :] *
+                       (-0.5*alpha[None, :, None]*(self.Z[:, :, None] - self.Z.T[None, :, :]) +
+                        0.5*alpha[None, :, None]*(2.*self.X_mu[:, None, :, None] - self.Z[:, :, None] - self.Z.T[None, :, :])/(2.*alpha[None, :, None]*self.X_S[:, None, :, None] + 1)) , 0)
+        # print(time.time() - t)
+
+        # assert np.sum(np.abs(res - res2)) < 10**-13
+
+        return res2
 
     def grad_Z(self, dF_dKmm, dKmm_dZ, dF_dexp_K_miY, dexp_K_miY_dZ, dF_dexp_K_mi_K_im, dexp_K_mi_K_im_dZ):
         # I think we need individual kernel_exp matrices here... So don't pass them
