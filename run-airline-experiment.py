@@ -11,10 +11,11 @@ import parallel_GPLVM
 
 print('Starting...')
 
-N = 700
-P = 60
+N = 100
+P = 2
 Q = 9
-num_inducing = min(900, N)
+# num_inducing = min(900, N / P)
+num_inducing = 40
 path = './flight/'
 dname = 'flight'
 
@@ -54,7 +55,7 @@ options = {}
 options['input'] = path + '/inputs/'
 options['embeddings'] = path + '/embeddings/'
 options['parallel'] = 'local'
-options['iterations'] = 1000
+options['iterations'] = 100
 options['statistics'] = path + '/tmp'
 options['tmp'] = path + '/tmp'
 options['M'] = num_inducing
@@ -66,6 +67,8 @@ options['load'] = False
 options['init'] = 'PCA'
 options['optimiser'] = 'SCG_adapted'
 options['fixed_beta'] = False
+
+options['local_no_pool'] = True
 
 print('Running...')
 parallel_GPLVM.main(options)

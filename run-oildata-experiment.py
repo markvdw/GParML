@@ -19,6 +19,8 @@ split_data.clean_dir(path)
 
 # Load data
 Y = np.loadtxt(path + '/proc/oilflow', delimiter=',')
+print ('Dataset size:')
+print (Y.shape)
 split_data.split_data(Y, P, path, dname)
 
 # Prepare directories
@@ -45,6 +47,8 @@ options['fixed_beta'] = True
 options['init'] = 'PCA'
 options['optimiser'] = 'SCG_adapted'
 options['fixed_beta'] = False
+
+options['local_no_pool'] = True
 
 parallel_GPLVM.main(options)
 

@@ -287,22 +287,37 @@ class partial_terms(object):
         return dexp_K_miY_dalpha
 
     def dexp_K_mi_K_im_dalpha(self):
+        import time
         alpha = self.hyp.ard**-2
 
         # Eqn (5.61)
         # TODO: Can easily vectorise (m, md) loop. Verify this first, then refactor.
-        dexp_K_mi_K_im_dalpha = np.zeros((self.Q, self.M, self.M))
-        for i in xrange(self.local_N):
-            mu = self.X_mu[i, :]
-            s = self.X_S[i, :]
-            for q in xrange(self.Q):
-                for m in xrange(self.M):
-                    for md in xrange(self.M):
-                        dexp_K_mi_K_im_dalpha[q, m, md] += (self.exp_K_mi_K_im[i, m, md] *
-                                                            (-0.25*(self.Z[m, q] - self.Z[md, q])**2 +
-                                                             -0.25*((2.*mu[q] - self.Z[m, q] - self.Z[md, q]) / (2.*alpha[q]*s[q] + 1.))**2. +
-                                                             -(s[q] / (2.*alpha[q]*s[q] + 1.)))
-                                                           )
+        # timea = time.time()
+        # dexp_K_mi_K_im_dalpha = np.zeros((self.Q, self.M, self.M))
+        # for i in xrange(self.local_N):
+        #     mu = self.X_mu[i, :]
+        #     s = self.X_S[i, :]
+        #     for q in xrange(self.Q):
+        #         for m in xrange(self.M):
+        #             for md in xrange(self.M):
+        #                 dexp_K_mi_K_im_dalpha[q, m, md] += (self.exp_K_mi_K_im[i, m, md] *
+        #                                                     (-0.25*(self.Z[m, q] - self.Z[md, q])**2 +
+        #                                                      -0.25*((2.*mu[q] - self.Z[m, q] - self.Z[md, q]) / (2.*alpha[q]*s[q] + 1.))**2. +
+        #                                                      -(s[q] / (2.*alpha[q]*s[q] + 1.)))
+        #                                                    )
+        # print (time.time() - timea)
+
+        # Test alternative calculation
+        # timec = time.time()
+        dexp_K_mi_K_im_dalpha = np.sum(self.exp_K_mi_K_im[:, None, :, :] * (
+                    (-0.25*np.rollaxis(self.Z[:, None, :] - self.Z[:, :], 2)**2) +
+                    -0.25*np.rollaxis((2.*self.X_mu[:, None, None, :] - self.Z[:, None, :] - self.Z[:, :]) / (2.*alpha[None, None, :]*self.X_S[:, None, None, :] + 1.), 3, 1)**2
+                    -np.rollaxis(self.X_S[:, None, None, :] / (2.*alpha[:]*self.X_S[0, None, None, :] + 1.), 3, 1)), 0)
+        # print (time.time() - timec)
+
+        # print (a.shape)
+        # print np.sum(np.abs(a - dexp_K_mi_K_im_dalpha))
+
         return dexp_K_mi_K_im_dalpha
 
     def grad_alpha(self, dF_dKmm, dKmm_dalpha, dF_dexp_K_miY, dexp_K_miY_dalpha, dF_dexp_K_mi_K_im, dexp_K_mi_K_im_dalpha):
