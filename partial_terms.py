@@ -46,6 +46,7 @@ class partial_terms(object):
         for i, (mu, s) in enumerate(zip(self.X_mu, self.X_S)):
             self.exp_K_mi_K_im[i, :, :] = kernel_exp.calc_expect_K_mi_K_im(self.Z, 
                 self.hyp, np.atleast_2d(mu), np.atleast_2d(s))
+        self.exp_K_mi = kernel_exp.calc_expect_K_mi(self.Z, self.hyp, self.X_mu, self.X_S)
 
         if is_set_statistics:
             self.update_local_statistics()
@@ -200,10 +201,9 @@ class partial_terms(object):
 
         res = np.zeros((self.M, self.Q, self.D))
 
-        exp_K_mi = kernel_exp.calc_expect_K_mi(self.Z, self.hyp, self.X_mu, self.X_S)
         for j in range(self.M):
             for k in range(self.Q):
-                n_factors = exp_K_mi[:, j] * alpha[k] * ((self.X_mu[:, k] - self.Z[j, k]) / (alpha[k] * self.X_S[:, k] + 1))
+                n_factors = self.exp_K_mi[:, j] * alpha[k] * ((self.X_mu[:, k] - self.Z[j, k]) / (alpha[k] * self.X_S[:, k] + 1))
                 res[j, k, :] = n_factors.dot(self.Y)
 
         return res
@@ -296,14 +296,13 @@ class partial_terms(object):
     def dexp_K_miY_dalpha(self):
         alpha = self.hyp.ard**-2
         # Eqn (5.60)
-        exp_K_mi = kernel_exp.calc_expect_K_mi(self.Z, self.hyp, self.X_mu, self.X_S)
         dexp_K_miY_dalpha = np.zeros((self.Q, self.M, self.D))
 
         for q in xrange(self.Q):
             for i in xrange(self.local_N):
                 alphaS = alpha * self.X_S[i, :]
                 # Correct by comparison to GPy:
-                v = -0.5 * exp_K_mi[i, :] * (((self.X_mu[i, q] - self.Z[:, q]) / (alphaS[q] + 1.0))**2.0 + self.X_S[i, q] / (alphaS[q] + 1.0))
+                v = -0.5 * self.exp_K_mi[i, :] * (((self.X_mu[i, q] - self.Z[:, q]) / (alphaS[q] + 1.0))**2.0 + self.X_S[i, q] / (alphaS[q] + 1.0))
                 dexp_K_miY_dalpha[q, :, :] += np.outer(v, self.Y[i, :])
 
         return dexp_K_miY_dalpha
@@ -437,7 +436,6 @@ class partial_terms(object):
         dF_dexp_K_mi_K_im = (-0.5*self.beta*self.D*self.Kmm_plus_op_inv +
                               0.5*self.beta*self.D*self.Kmm_inv +
                              -0.5*self.beta**3 * (self.Kmm_plus_op_inv.dot(self.exp_K_miY.dot(self.exp_K_miY.T.dot(self.Kmm_plus_op_inv)))))
-        exp_K_mi = kernel_exp.calc_expect_K_mi(self.Z, self.hyp, self.X_mu, self.X_S)
 
         dF = np.zeros((self.local_N, self.Q))
         for i in xrange(self.local_N):
@@ -445,7 +443,7 @@ class partial_terms(object):
             dF[i, :] += -self.X_mu[i, :]
             for q in xrange(self.Q):
                 # Eqn (5.65)
-                dexp_K_miY_dmu_iq = np.outer(exp_K_mi[i, :] * (-alpha[q]*(self.X_mu[i, q] - self.Z[:, q]) /
+                dexp_K_miY_dmu_iq = np.outer(self.exp_K_mi[i, :] * (-alpha[q]*(self.X_mu[i, q] - self.Z[:, q]) /
                                                                 (alpha[q]*self.X_S[i, q] + 1.0)),
                                              self.Y[i, :])
 
@@ -472,14 +470,13 @@ class partial_terms(object):
         dF_dexp_K_mi_K_im = (-0.5*self.beta*self.D*self.Kmm_plus_op_inv +
                               0.5*self.beta*self.D*self.Kmm_inv +
                              -0.5*self.beta**3 * (self.Kmm_plus_op_inv.dot(self.exp_K_miY.dot(self.exp_K_miY.T.dot(self.Kmm_plus_op_inv)))))
-        exp_K_mi = kernel_exp.calc_expect_K_mi(self.Z, self.hyp, self.X_mu, self.X_S)
 
         for i in xrange(self.local_N):
             # Eqn (5.73)
             dF[i, :] = -0.5 * (1.0 - 1.0 / self.X_S[i, :])
             for q in xrange(self.Q):
                 # Eqn (5.69)
-                dexp_K_miY_ds_iq = np.outer(exp_K_mi[i, :] *
+                dexp_K_miY_ds_iq = np.outer(self.exp_K_mi[i, :] *
                                     ( 0.5 * ((alpha[q] * (self.X_mu[i, q] - self.Z[:, q])) / (alpha[q]*self.X_S[i, q] + 1.0))**2
                                      -0.5 * (alpha[q] / (alpha[q]*self.X_S[i, q] + 1))), self.Y[i, :])
                 # Eqn (5.70)
