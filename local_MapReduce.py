@@ -122,14 +122,16 @@ def statistics_MR(options):
         input_files = [input_files[i] for i in ind]
     # Send both input_file_name and options to each mapper
     arguments = zip(input_files,itertools.repeat(options))
-    pool = multiprocessing.Pool(len(input_files))
-    map_responses = pool.map(statistics_mapper, arguments)
-    pool.close()
-    pool.join()
-    # Code to debug locally because the trace from within the pool is not informative
-    # map_responses = []
-    # for arg in arguments:
-    #    map_responses.append(statistics_mapper(arg))
+    if (not (('local_no_pool' in options) and (options['local_no_pool']))):
+        pool = multiprocessing.Pool(len(input_files))
+        map_responses = pool.map(statistics_mapper, arguments)
+        pool.close()
+        pool.join()
+    else:
+        # Code to debug locally because the trace from within the pool is not informative
+        map_responses = []
+        for arg in arguments:
+           map_responses.append(statistics_mapper(arg))
 
     # Extract the execution time from the map responses
     file_names_list = []
@@ -141,13 +143,15 @@ def statistics_MR(options):
     partitioned_data = partition(itertools.chain(*file_names_list))
     
     arguments = zip(partitioned_data,itertools.repeat(options))
-    pool = multiprocessing.Pool(len(input_files))
-    reduced_values = pool.map(statistics_reducer, arguments)
-    pool.close()
-    pool.join()
-    # reduced_values = []
-    # for arg in arguments:
-    #    reduced_values.append(statistics_reducer(arg))
+    if (not (('local_no_pool' in options) and (options['local_no_pool']))):
+        pool = multiprocessing.Pool(len(input_files))
+        reduced_values = pool.map(statistics_reducer, arguments)
+        pool.close()
+        pool.join()
+    else:
+        reduced_values = []
+        for arg in arguments:
+            reduced_values.append(statistics_reducer(arg))
 
     # Extract the execution time from the reduced values
     file_names_list = []
@@ -279,13 +283,16 @@ def embeddings_MR(options):
         input_files = [input_files[i] for i in ind]
     # Send options to each mapper
     arguments = zip(input_files,itertools.repeat(options))
-    pool = multiprocessing.Pool(len(input_files))
-    embeddings_MR_time = pool.map(embeddings_mapper, arguments)
-    pool.close()
-    pool.join()
-    # Code to debug locally because the trace from within the pool is not informative
-    #for arg in arguments:
-    #    embeddings_mapper(arg)
+    if (not (('local_no_pool' in options) and (options['local_no_pool']))):
+        pool = multiprocessing.Pool(len(input_files))
+        embeddings_MR_time = pool.map(embeddings_mapper, arguments)
+        pool.close()
+        pool.join()
+    else:
+        # Code to debug locally because the trace from within the pool is not informative
+        for arg in arguments:
+            embeddings_mapper(arg)
+
     return embeddings_MR_time
     
 def embeddings_mapper((input_file_name, options)):
