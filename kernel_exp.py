@@ -104,15 +104,24 @@ def calc_expect_K_mi (Z, hyp_ard, X_mu, X_S):
     sf = hyp_ard.sf
     alpha = 1.0 / hyp_ard.ard**2
 
-    res = np.zeros((N, M))
-    for n, (mu, s) in enumerate(zip(X_mu, X_S)):
-        Salpha = s * alpha
-        const = sf**2 / np.prod((Salpha + 1)**0.5)
+    # import time
+    # t = time.time()
+    # res = np.zeros((N, M))
+    # for n, (mu, s) in enumerate(zip(X_mu, X_S)):
+    #     Salpha = s * alpha
+    #     const = sf**2 / np.prod((Salpha + 1)**0.5)
+    #
+    #     for m in range(M):
+    #         res[n, m] = const * np.exp( -0.5 * np.sum(((Z[m, :] - mu)**2 * alpha) / (Salpha + 1)) )
+    # print time.time() - t
 
-        for m in range(M):
-            res[n, m] = const * np.exp( -0.5 * np.sum(((Z[m, :] - mu)**2 * alpha) / (Salpha + 1)) )
+    # t = time.time()
+    res2 = (sf**2 / np.prod((X_S[:, :] * alpha[None, :] + 1.)**0.5, 1)[:, None]) * np.exp(-0.5*np.sum( ( (Z[None, :, :] - X_mu[:, None, :])**2 * alpha[None, None, :] ) / (X_S[:, None, :] + 1.) , 2))
+    # print time.time() - t
 
-    return res
+    # assert np.sum(np.abs(res - res2)) < 10**-12
+
+    return res2
 
 def calc_expect_K_mi_K_im_old (Z, hyp_ard, X_mu, X_S):
     '''
