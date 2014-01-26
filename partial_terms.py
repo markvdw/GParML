@@ -528,6 +528,13 @@ class partial_terms(object):
         s1, Kmm_logdet = linalg.slogdet(self.Kmm)
         s2, Kmm_plus_op_logdet = linalg.slogdet(Kmm_plus_op)
 
+        # Add jitter if either matrices is not PSD
+        if s1 < 0:
+            s1, Kmm_logdet = linalg.slogdet(self.Kmm + np.eye(self.M) * 1e-7)
+        if s2 < 0:
+            Kmm_plus_op += np.eye(self.M) * 1e-7
+            s2, Kmm_plus_op_logdet = linalg.slogdet(Kmm_plus_op)
+
         if __debug__:
             assert s1 >= 0.0
             assert s2 >= 0.0

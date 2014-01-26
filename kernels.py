@@ -20,7 +20,7 @@ class ArdHypers(object):
         if ard==None:
             self.ard = np.ones(D) * ll
         else:
-            self.ard = np.array(ard).squeeze()
+            self.ard = np.atleast_1d(np.array(ard).squeeze())
             assert self.ard.ndim == 1
 
     @property
@@ -105,7 +105,7 @@ class rbf:
         assert X.shape[1] == X2.shape[1]
 
         # Actually calculate the covariance matrix
-        K = distance.cdist(X, X2, 'seuclidean', V=2*self.ard**2)
+        K = distance.cdist(X, X2, 'seuclidean', V=np.atleast_1d(2*self.ard**2))
         assert K.shape == (N, N2)
 
         K = self.sf**2 * np.exp(-K**2)
