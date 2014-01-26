@@ -118,6 +118,7 @@ def statistics_MR(options):
     if 'drop_out_fraction' in options and options['drop_out_fraction'] > 0:
         ind = random.sample(range(len(input_files)), int((1 - options['drop_out_fraction']) * len(input_files)))
         if len(ind) == 0:
+            print 'Warning: dropout fraction too high -- using at least one node'
             ind = [random.randint(0, len(input_files))]
         input_files = [input_files[i] for i in ind]
     # Send both input_file_name and options to each mapper
@@ -279,6 +280,7 @@ def embeddings_MR(options):
     if 'drop_out_fraction' in options and options['drop_out_fraction'] > 0:
         ind = random.sample(range(len(input_files)), int((1 - options['drop_out_fraction']) * len(input_files)))
         if len(ind) == 0:
+            print 'Warning: dropout fraction too high -- using at least one node'
             ind = [random.randint(0, len(input_files))]
         input_files = [input_files[i] for i in ind]
     # Send options to each mapper
