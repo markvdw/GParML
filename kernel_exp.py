@@ -116,7 +116,7 @@ def calc_expect_K_mi (Z, hyp_ard, X_mu, X_S):
     # print time.time() - t
 
     # t = time.time()
-    res2 = (sf**2 / np.prod((X_S[:, :] * alpha[None, :] + 1.)**0.5, 1)[:, None]) * np.exp(-0.5*np.sum( ( (Z[None, :, :] - X_mu[:, None, :])**2 * alpha[None, None, :] ) / (X_S[:, None, :] + 1.) , 2))
+    res2 = (sf**2 / np.prod((X_S[:, :] * alpha[None, :] + 1.)**0.5, 1)[:, None]) * np.exp(-0.5*np.sum( ( (Z[None, :, :] - X_mu[:, None, :])**2 * alpha[None, None, :] ) / (alpha[None, None, :] * X_S[:, None, :] + 1.) , 2))
     # print time.time() - t
 
     # assert np.sum(np.abs(res - res2)) < 10**-12
