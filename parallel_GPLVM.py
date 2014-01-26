@@ -124,6 +124,8 @@ def main(opt_param = None):
 
     with open(options['statistics'] + '/time_acc.obj', 'wb') as f:
         pickle.dump(time_acc, f)
+    with open(options['statistics'] + '/nlml_acc.obj', 'wb') as f:
+        pickle.dump(x_opt[1], f)
     if options['optimiser'] == 'SCG_adapted':
         with open(options['statistics'] + '/time_acc_SCG_adapted.obj', 'wb') as f:
             pickle.dump(x_opt[4], f)
