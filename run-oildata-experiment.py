@@ -8,8 +8,9 @@ import numpy as np
 import tools.split_data as split_data
 import parallel_GPLVM
 
-P = 10
+P = 7
 Q = 7
+N = 1000
 num_inducing = 40
 path = './oildata/'
 dname = 'oildata'
@@ -21,7 +22,10 @@ split_data.clean_dir(path)
 Y = np.loadtxt(path + '/proc/oilflow', delimiter=',')
 print ('Dataset size:')
 print (Y.shape)
-split_data.split_data(Y, P, path, dname)
+print ('N:')
+print (N)
+perm = split_data.split_data(Y[:N], P, path, dname)
+np.save(path + 'permutation.npy', perm)
 
 # Prepare directories
 reqdirs = ['inputs', 'embeddings', 'tmp', 'proc']
