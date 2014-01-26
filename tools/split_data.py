@@ -16,7 +16,7 @@ def split_data(Y, P, path, dname):
     '''
     f = []
     for p in xrange(1, P+1):
-        name = path + 'inputs/' + dname + '_' + str(p)
+        name = path + '/inputs/' + dname + '_' + str(p)
         f.append(open(name, 'w'))
 
     perm = np.random.permutation(Y.shape[0])
