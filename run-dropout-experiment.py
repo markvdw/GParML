@@ -11,16 +11,21 @@ import parallel_GPLVM
 P = 10
 Q = 7
 N = 1000
-iterations = 300
+iterations = 500
 num_inducing = 40
-path = './oildata'
+dropout_freq = [0, 0.01, 0.02, 0.03] # 1/P jumps
+path = '/scratch/yg279/Drop_out_test_3/oildata'
 dname = 'oildata'
 
-for repetition in [1, 2, 3, 4, 5]:
-    for dropout in [0, 0.2, 0.4, 0.6, 0.8]:
-        # First delete all current inputs & embeddings
-        split_data.clean_dir(path)
+# Prepare directories
+reqdirs = ['inputs', 'embeddings', 'tmp', 'proc']
+for dirname in reqdirs:
+    if not os.path.exists(path + '/' + dirname):
+        os.mkdir(path + '/' + dirname)
 
+for repetition in range(0,10):
+    np.random.seed(seed=repetition)
+    for dropout in dropout_freq:
         # Load data
         Y = np.loadtxt(path + '/proc/oilflow', delimiter=',')
         print ('Dataset size:')
@@ -32,11 +37,8 @@ for repetition in [1, 2, 3, 4, 5]:
         print ('Repetition:')
         print (repetition)
 
-        # Prepare directories
-        reqdirs = ['inputs', 'embeddings', 'tmp', 'proc']
-        for dirname in reqdirs:
-            if not os.path.exists(path + '/' + dirname):
-                os.mkdir(path + '/' + dirname)
+        # First delete all current inputs & embeddings
+        split_data.clean_dir(path)
 
         perm = split_data.split_data(Y[:N], P, path, dname)
         np.save(path + '/permutation.npy', perm)
@@ -59,6 +61,7 @@ for repetition in [1, 2, 3, 4, 5]:
         options['init'] = 'PCA'
         options['optimiser'] = 'SCG_adapted'
         options['fixed_beta'] = False
+        options['drop_out_fraction'] = dropout
 
         options['local_no_pool'] = False
 
