@@ -104,6 +104,9 @@ def init(options):
     return options
 
 
+# Keep the dropped out nodes in a global variable to share between the different MRs
+dropped_out_nodes = []
+non_dropped_out_nodes = []
 
 '''
 Statistics Map-Reduce functions:
@@ -113,14 +116,18 @@ def statistics_MR(options):
     '''
     Gets as input options and statistics to use in accumulation; returns as output partial sums. Writes files to /tmp/ to pass information between different nodes.
     '''
+    global non_dropped_out_nodes, dropped_out_nodes
     input_files = sorted(glob.glob(options['input'] + '/*'))
     # Dropout drop_out_fraction of the nodes
     if 'drop_out_fraction' in options and options['drop_out_fraction'] > 0:
-        ind = random.sample(range(len(input_files)), int((1 - options['drop_out_fraction']) * len(input_files)))
-        if len(ind) == 0:
+        drop_out = numpy.random.uniform(size=len(input_files)) < options['drop_out_fraction']
+        dropped_out_nodes = numpy.arange(len(input_files))[drop_out]
+        non_dropped_out_nodes = numpy.arange(len(input_files))[~drop_out]
+        if len(non_dropped_out_nodes) == 0:
             print 'Warning: dropout fraction too high -- using at least one node'
-            ind = [random.randint(0, len(input_files))]
-        input_files = [input_files[i] for i in ind]
+            non_dropped_out_nodes = [random.randint(0, len(input_files) - 1)]
+        input_files = [input_files[i] for i in non_dropped_out_nodes]
+
     # Send both input_file_name and options to each mapper
     arguments = zip(input_files,itertools.repeat(options))
     if (not (('local_no_pool' in options) and (options['local_no_pool']))):
@@ -244,6 +251,7 @@ def statistics_reducer((source_file_name_list, options)):
     '''
     Reduces a list of file names (of a single statistic) to a single file by summing them and deleting the old files
     '''
+    global non_dropped_out_nodes, dropped_out_nodes
     start = time.time()
     statistic = source_file_name_list[0]
     files_names = source_file_name_list[1]
@@ -251,13 +259,18 @@ def statistics_reducer((source_file_name_list, options)):
     target_file_name = options['statistics'] + '/accumulated_statistics_' + statistic + '_' + str(options['i']) + '.npy'
     if len(files_names) == 1:
         # Move to the statistics folder
-        os.rename(files_names[0], target_file_name)
+        accumulated_statistics = load(files_names[0])
+        if 'drop_out_fraction' in options and options['drop_out_fraction'] > 0:
+            accumulated_statistics /= float(len(non_dropped_out_nodes)) / (len(non_dropped_out_nodes) + len(dropped_out_nodes))
+        save(target_file_name, accumulated_statistics)
     else:
         accumulated_statistics = load(files_names[0])
         remove(files_names[0])
         for file_name in files_names[1:]:
             accumulated_statistics += load(file_name)
             remove(file_name)
+        if 'drop_out_fraction' in options and options['drop_out_fraction'] > 0:
+            accumulated_statistics /= float(len(non_dropped_out_nodes)) / (len(non_dropped_out_nodes) + len(dropped_out_nodes))
         save(target_file_name, accumulated_statistics)
 
     end = time.time()
@@ -274,15 +287,12 @@ def embeddings_MR(options):
     (given in options) to pass information between different nodes. This function is only called 
     if we are optimising the embeddings, so no further checks are made.
     '''
-
+    global non_dropped_out_nodes
     input_files = sorted(glob.glob(options['input'] + '/*'))
     # Dropout drop_out_fraction of the nodes
-    if 'drop_out_fraction' in options and options['drop_out_fraction'] > 0:
-        ind = random.sample(range(len(input_files)), int((1 - options['drop_out_fraction']) * len(input_files)))
-        if len(ind) == 0:
-            print 'Warning: dropout fraction too high -- using at least one node'
-            ind = [random.randint(0, len(input_files))]
-        input_files = [input_files[i] for i in ind]
+    #if 'drop_out_fraction' in options and options['drop_out_fraction'] > 0:
+    #    input_files = [input_files[i] for i in non_dropped_out_nodes]
+
     # Send options to each mapper
     arguments = zip(input_files,itertools.repeat(options))
     if (not (('local_no_pool' in options) and (options['local_no_pool']))):
