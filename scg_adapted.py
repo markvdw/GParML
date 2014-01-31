@@ -29,7 +29,7 @@ for cases when it is cheaper to evaluate both together
 import numpy as np
 import sys
 from numpy.linalg.linalg import LinAlgError
-import warnings
+import traceback
 import scg_adapted_local_MapReduce as local_MapReduce
 debug = False
 
@@ -57,9 +57,13 @@ def safe_f_and_grad_f(f_and_gradf, x, iteration=0, step_size=0, *optargs):
             print 'Too many errors...'
             raise e
         _fail_count += 1
-        print 
-        print '\tIncreasing failed count: ' + str(_fail_count)
-        print 
+        print
+
+        _,_,tb = sys.exc_info()
+        tbInfo = traceback.extract_tb(tb)
+        filename,line,func,text = tbInfo[-1]
+        print ('An error occurred on line ' + str(line) + ' in filename ' + filename)
+        print 'Increasing failed count (' + str(_fail_count) + ') and returning nlml inf'
         #print 'x catch:'
         #print x
         #print 

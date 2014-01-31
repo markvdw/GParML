@@ -23,6 +23,7 @@
 import numpy as np
 from numpy.linalg.linalg import LinAlgError
 import sys
+import traceback
 import gd_local_MapReduce as local_MapReduce
 
 
@@ -49,8 +50,11 @@ def safe_f_and_grad_f(f_and_gradf, x, iteration=0, step_size=0, *optargs):
             raise e
         _fail_count += 1
         print
-        print '\tIncreasing failed count: ' + str(_fail_count)
-        print
+        _,_,tb = sys.exc_info()
+        tbInfo = traceback.extract_tb(tb)
+        filename,line,func,text = tbInfo[-1]
+        print ('An error occurred on line ' + str(line) + ' in filename ' + filename)
+        print 'Increasing failed count (' + str(_fail_count) + ') and returning nlml inf'
         f = np.inf
         gradf = np.ones(x.shape)
     return f, gradf
@@ -70,16 +74,16 @@ def GD(f_and_gradf, x, tmp_folder, fixed_embeddings=False, optargs=(), maxiters=
     status: string describing convergence status
     """
     if xtol is None:
-        xtol = 1e-6
+        xtol = 1e-16
     if ftol is None:
         ftol = 1e-6
     if gtol is None:
-        gtol = 1e-5
+        gtol = 1e-6
 
     len_maxiters = len(str(maxiters))
 
     step_size = 0.01
-    mom_size = 0.1
+    mom_size = 0.0
 
     f_gradf = safe_f_and_grad_f(f_and_gradf, x, iteration=0, step_size=0, *optargs)
     fnow = f_gradf[0]
@@ -94,6 +98,13 @@ def GD(f_and_gradf, x, tmp_folder, fixed_embeddings=False, optargs=(), maxiters=
         xprop = x + step_size * direction
         f_gradf = safe_f_and_grad_f(f_and_gradf, xprop, iteration=iteration, step_size=step_size, *optargs)
         fproposed = f_gradf[0]
+
+        if (np.abs(fnow - fproposed) < ftol):
+            break
+            print 'converged due to ftol'
+        if (np.abs(step_size) < xtol):
+            break
+            print 'converged due to xtol'
 
         if (fproposed <= fnow):
             fnow = fproposed
@@ -114,7 +125,7 @@ def GD(f_and_gradf, x, tmp_folder, fixed_embeddings=False, optargs=(), maxiters=
             max_abs_gradnow = np.max(np.abs(gradnow))
             if not fixed_embeddings:
                 max_abs_gradnow = max(max_abs_gradnow, local_MapReduce.embeddings_get_grads_max_gradnow(tmp_folder))
-            if (max_abs_gradnow < 10**-6):
+            if (max_abs_gradnow < gtol):
                 break
                 print 'converged due to grad'
         else:
