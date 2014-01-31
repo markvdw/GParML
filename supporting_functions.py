@@ -122,63 +122,48 @@ def PCA(Y, input_dim):
 
 
 
-lim_val = -numpy.log(sys.float_info.epsilon) 
-# Transform a parameter to be in (0, inf) if the bound constraints it to be positive 
+lim_val = -numpy.log(sys.float_info.epsilon)
+# Transform a parameter to be in (0, inf) if the bound constraints it to be positive
 def transform(b, x):
     if b == (0, None):
-        if x > lim_val:
-            return x
-        elif x < -lim_val:
-            return numpy.log(1 + numpy.exp(-lim_val))
-        else:
-            return numpy.log(1 + numpy.exp(x))
+        assert -lim_val < x < lim_val
+        return numpy.log(1 + numpy.exp(x))
     elif b == (None, None):
         return x
 
-# Transform a parameter back to be in (-inf, inf) if the bound constraints it to be positive 
+# Transform a parameter back to be in (-inf, inf) if the bound constraints it to be positive
 def transform_back(b, x):
     if b == (0, None):
-        if x > lim_val:
-            return x
-        elif x <= sys.float_info.epsilon:
-            return numpy.log(-1 + numpy.exp(sys.float_info.epsilon))
-        else:
-            return numpy.log(-1 + numpy.exp(x))
+        assert sys.float_info.epsilon < x < lim_val
+        return numpy.log(-1 + numpy.exp(x))
     elif b == (None, None):
         return x
 
-# Gradient of the (0, inf) transform if the bound constraints it to be positive 
+# Gradient of the (0, inf) transform if the bound constraints it to be positive
 def transform_grad(b, x):
     if b == (0, None):
-        if x > lim_val:
-            return 1
-        elif x < -lim_val:
-            return numpy.exp(lim_val) / (numpy.exp(lim_val) + 1)
-        else:
-            return 1 / (numpy.exp(-x) + 1)
+        assert -lim_val < x < lim_val
+        return 1 / (numpy.exp(-x) + 1)
     elif b == (None, None):
         return 1
 
 
 ''' Transformation functions for arrays with a single costraint '''
-# Transform a parameter to be in (0, inf) if the bound constraints it to be positive 
+# Transform a parameter to be in (0, inf) if the bound constraints it to be positive
 def transformVar(x):
+    assert numpy.all(-lim_val < x) and numpy.all(x < lim_val)
     val = numpy.log(1 + numpy.exp(x))
-    val[x > lim_val] = x[x > lim_val]
-    val[x < -lim_val] = numpy.log(1 + numpy.exp(-lim_val))
     return val
 
-# Transform a parameter back to be in (-inf, inf) if the bound constraints it to be positive 
+# Transform a parameter back to be in (-inf, inf) if the bound constraints it to be positive
 def transformVar_back(x):
-    x[x <= sys.float_info.epsilon] = sys.float_info.epsilon
+    assert numpy.all(sys.float_info.epsilon < x) and numpy.all(x < lim_val)
     val = numpy.log(-1 + numpy.exp(x))
-    val[x > lim_val] = x[x > lim_val]
     return val
 
-# Gradient of the (0, inf) transform if the bound constraints it to be positive 
+# Gradient of the (0, inf) transform if the bound constraints it to be positive
 def transformVar_grad(x):
+    assert numpy.all(-lim_val < x) and numpy.all(x < lim_val)
     val = 1 / (numpy.exp(-x) + 1)
-    val[x > lim_val] = 1
-    val[x < -lim_val] = 1 / (numpy.exp(lim_val) + 1)
     return val
 
