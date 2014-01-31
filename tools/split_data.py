@@ -5,6 +5,7 @@ import numpy as np
 def clean_dir(path):
     filelist = glob.glob(path + "/inputs/*")
     filelist.extend(glob.glob(path + "/embeddings/*"))
+    filelist.extend(glob.glob(path + "/tmp/*"))
     for f in filelist:
         os.remove(f)
 
