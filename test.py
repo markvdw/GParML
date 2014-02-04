@@ -10,7 +10,7 @@ import partial_terms
 import kernels
 
 import sys
-sys.path.append("/home/yg279/Downloads/GPy-master")
+sys.path.append("FOLDER_PATH")
 import GPy
 
 ###########################################################################
