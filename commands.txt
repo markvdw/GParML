@@ -1,3 +1,0 @@
-python parallel_GPLVM.py -i ./test/inputs/ -e ./test/embeddings/ --statistics ./test/statistics/ --tmp ./test/tmp/ -k -T 5 -M 2 -Q 2 -D 4
-
-python -m cProfile -s cumtime test_parallel_gpLVM.py > profiler_test_parallel_gpLVM.txt
