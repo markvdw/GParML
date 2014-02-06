@@ -151,29 +151,11 @@ class partial_terms(object):
         Returns:
             MxQxM matrix. First two axes are the axes of Z, last indexes the
             non-zero elements of the derivative matrix.
-
-        Status:
-            Finished
-            Tested
         '''
         alpha = 1.0 / self.hyp.ard**2
 
-        # import time
-        # t = time.time()
-        # res = np.zeros((self.M, self.Q, self.M))
-        # for j in xrange(self.M):
-        #     for k in xrange(self.Q):
-        #         for mp in xrange(self.M):
-        #             res[j, k, mp] = self.kernel.K(self.Z[j, :], self.Z[mp, :])
-        #             res[j, k, mp] *= -alpha[k]*(self.Z[j, k] - self.Z[mp, k])
-        # print time.time() - t
-
-        # t = time.time()
         K = self.kernel.K(self.Z, self.Z)
         res2 = K[:, None, :] * -alpha[None, :, None] * (self.Z[:, :, None] - self.Z.T[None, :, :])
-        # print time.time() - t
-
-        # assert np.sum(np.abs(res2 - res)) < 10**-12
 
         return res2
 
@@ -188,9 +170,6 @@ class partial_terms(object):
 
         Returns:
 
-
-        Status:
-             Confirmed correct by comparison to GPy.
         '''
 
         # Here, we're taking the derivative of exp_K_miY (2D matrix), with respect
@@ -214,39 +193,14 @@ class partial_terms(object):
         Calculates the gradient of exp_K_mi_K_im w.r.t. Z. Eqn (5.52).
 
         Eqn (5.10), (5.14) & (5.52)
-
-        Status:
-             Confirmed correct by comparison to GPy.
         '''
         alpha = self.hyp.ard**-2
-
-        # import time
-        #
-        # t = time.time()
-        # res = np.zeros((self.M, self.Q, self.M))
-        # # Need to sum over all input points
-        # for n, (mu, s) in enumerate(zip(self.X_mu, self.X_S)):
-        #     # Now calculate each element of the output
-        #     for j in xrange(self.M):
-        #         for k in xrange(self.Q):
-        #             res[j, k, :] += (self.exp_K_mi_K_im[n, j, :] *
-        #                              (-0.5*alpha[k]*(self.Z[j, k] - self.Z[:, k]) +
-        #                                0.5*alpha[k]*(2*mu[k] - self.Z[j, k] - self.Z[:, k])/(2*alpha[k]*s[k] + 1) ))
-        # print(time.time() - t)
-
-        # t = time.time()
-        # res2 = np.sum( self.exp_K_mi_K_im[:, :, None, :] *
-        #                (-0.5*alpha[None, :, None]*(self.Z[:, :, None] - self.Z.T[None, :, :]) +
-        #                 0.5*alpha[None, :, None]*(2.*self.X_mu[:, None, :, None] - self.Z[:, :, None] - self.Z.T[None, :, :])/(2.*alpha[None, :, None]*self.X_S[:, None, :, None] + 1)) , 0)
 
         res = np.zeros((self.M, self.Q, self.M))
         for i in xrange(self.local_N):
             res += (self.exp_K_mi_K_im[i, :, None, :] *
                        (-0.5*alpha[None, :, None]*(self.Z[:, :, None] - self.Z.T[None, :, :]) +
                         0.5*alpha[None, :, None]*(2.*self.X_mu[i, None, :, None] - self.Z[:, :, None] - self.Z.T[None, :, :])/(2.*alpha[None, :, None]*self.X_S[i, None, :, None] + 1)))
-        # print(time.time() - t)
-
-        # assert np.sum(np.abs(res - res2)) < 10**-13
 
         return res
 
@@ -317,43 +271,15 @@ class partial_terms(object):
         return dexp_K_miY_dalpha
 
     def dexp_K_mi_K_im_dalpha(self):
-        # import time
         alpha = self.hyp.ard**-2
 
         # Eqn (5.61)
-        # TODO: Can easily vectorise (m, md) loop. Verify this first, then refactor.
-        # timea = time.time()
-        # dexp_K_mi_K_im_dalpha = np.zeros((self.Q, self.M, self.M))
-        # for i in xrange(self.local_N):
-        #     mu = self.X_mu[i, :]
-        #     s = self.X_S[i, :]
-        #     for q in xrange(self.Q):
-        #         for m in xrange(self.M):
-        #             for md in xrange(self.M):
-        #                 dexp_K_mi_K_im_dalpha[q, m, md] += (self.exp_K_mi_K_im[i, m, md] *
-        #                                                     (-0.25*(self.Z[m, q] - self.Z[md, q])**2 +
-        #                                                      -0.25*((2.*mu[q] - self.Z[m, q] - self.Z[md, q]) / (2.*alpha[q]*s[q] + 1.))**2. +
-        #                                                      -(s[q] / (2.*alpha[q]*s[q] + 1.)))
-        #                                                    )
-        # print (time.time() - timea)
-
-        # Test alternative calculation
-        # timec = time.time()
-        # dexp_K_mi_K_im_dalpha = np.sum(self.exp_K_mi_K_im[:, None, :, :] * (
-        #             (-0.25*np.rollaxis(self.Z[:, None, :] - self.Z[:, :], 2)**2) +
-        #             -0.25*np.rollaxis((2.*self.X_mu[:, None, None, :] - self.Z[:, None, :] - self.Z[:, :]) / (2.*alpha[None, None, :]*self.X_S[:, None, None, :] + 1.), 3, 1)**2
-        #             -np.rollaxis(self.X_S[:, None, None, :] / (2.*alpha[:]*self.X_S[:, None, None, :] + 1.), 3, 1)), 0)
-
         res = np.zeros((self.Q, self.M, self.M))
         for i in xrange(self.local_N):
             res += (self.exp_K_mi_K_im[i, None, :, :] * (
                     (-0.25*np.rollaxis(self.Z[:, None, :] - self.Z[:, :], 2)**2) +
                     -0.25*np.rollaxis((2.*self.X_mu[i, None, None, :] - self.Z[:, None, :] - self.Z[:, :]) / (2.*alpha[None, None, :]*self.X_S[i, None, None, :] + 1.), 2, 0)**2
                     -np.rollaxis(self.X_S[i, None, None, :] / (2.*alpha[:]*self.X_S[i, None, None, :] + 1.), 2, 0)))
-        # print (time.time() - timec)
-
-        # print (a.shape)
-        # print np.sum(np.abs(a - dexp_K_mi_K_im_dalpha))
 
         return res
 
@@ -518,11 +444,6 @@ class partial_terms(object):
 
         Returns:
             A single number, the log marginal likelihood.
-
-        Status:
-            Finished
-            Tested
-                - Corresponds with gradient w.r.t. Kmm.
         '''
         Kmm_plus_op = self.Kmm + self.beta*self.sum_exp_K_mi_K_im
         s1, Kmm_logdet = linalg.slogdet(self.Kmm)
@@ -550,35 +471,3 @@ class partial_terms(object):
                 0.5*self.beta**2*np.trace(self.exp_K_miY.T.dot(linalg.inv(Kmm_plus_op).dot(self.exp_K_miY))) +
                -self.KL)
         return lml
-
-###############################################################################
-# calc_grad.py
-# Take the statistics calculated in parallel (sum them, or maybe do this
-# outside the class) and use them to calculate the gradients.
-###############################################################################
-class calc_grad(object):
-    def __init__(self, exp_K_ii, exp_K_miY, sum_exp_K_mi_K_im):
-        # We also need all other parameters.
-        self.exp_K_ii = exp_K_ii
-        self.exp_K_miY = exp_K_miY
-        self.sum_exp_K_mi_K_im = sum_exp_K_mi_K_im
-
-        self._calc_F_grads()
-
-    def _calc_F_grads(self):
-        '''
-        _calc_F_grads
-        Calculate the first parts of the chain of partial derivatives of F,
-        i.e.:
-          - dF_dexp_K_ii
-          - dF_dexp_K_miY
-          - dF_dexp_K_mi_K_im
-        For this we need the statistics which have been calculated in parallel:
-          - exp_K_ii (sum over all N)
-          - exp_K_miY (sum over all N)
-          - exp_K_mi_K_im (sum over all N)
-        And some useful matrices derived from these:
-          - Kmm_plus_op
-          - Kmm_plus_op_inv
-        '''
-        pass

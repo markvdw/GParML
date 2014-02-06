@@ -6,10 +6,6 @@
 #  - <K_{m<i>} K_{<i>m>}>_q(X_i)           (4.15)   - MxM matrix
 #  - Y_i Y_i^T
 # To be called from the first mapper function.
-#
-# Todo:
-#   - Vectorise certain calculations.
-#   - Adapt functions so they can take several datapoints (array X_mu and X_S).
 ###############################################################################
 
 import numpy as np
@@ -29,10 +25,6 @@ def calc_expect_K_mi_Y (Z, hyp_ard, X_mu, X_S, Y):
 
     Returns:
         MxoutD matrix: <K_{m<i>}>_q(X_i) Y'.
-
-    Status:
-        Finished
-        Untested
     '''
     # input assertions
     assert np.all(X_S >= 0.0)
@@ -48,30 +40,11 @@ def calc_expect_K_mi_Y (Z, hyp_ard, X_mu, X_S, Y):
     sf = hyp_ard.sf
     alpha = 1.0 / hyp_ard.ard**2
 
-#     res = np.zeros((M, outD))
-#
-#     for mu, s, y in zip(X_mu, X_S, Y):
-#         expvect = np.zeros(M)
-#         Salpha = s * alpha
-#         assert Salpha.shape[0] == Q
-#         const = sf**2 / np.prod((Salpha + 1)**0.5)
-#
-#         # Future optimisation: can be vectorised
-#         for m in range(M):
-#             expvect[m] += const * np.exp( -0.5 * np.sum(((Z[m, :] - mu)**2 * alpha) / (Salpha + 1)) )
-#
-#         res += np.outer(expvect, y)
-
-    # Alternative calculation:
-    # Correct! Replace after the next commit.
     ky_sum = np.zeros((M, outD))
     exp_K_mi = calc_expect_K_mi(Z, hyp_ard, X_mu, X_S)
     assert exp_K_mi.shape[0] == Y.shape[0]
     for expvect, y in zip(exp_K_mi, Y):
         ky_sum += np.outer(expvect, y)
-
-#     # Check whether alternative calculation is correct...
-#     assert np.all(ky_sum == res)
 
     return ky_sum
 
@@ -104,22 +77,7 @@ def calc_expect_K_mi (Z, hyp_ard, X_mu, X_S):
     sf = hyp_ard.sf
     alpha = 1.0 / hyp_ard.ard**2
 
-    # import time
-    # t = time.time()
-    # res = np.zeros((N, M))
-    # for n, (mu, s) in enumerate(zip(X_mu, X_S)):
-    #     Salpha = s * alpha
-    #     const = sf**2 / np.prod((Salpha + 1)**0.5)
-    #
-    #     for m in range(M):
-    #         res[n, m] = const * np.exp( -0.5 * np.sum(((Z[m, :] - mu)**2 * alpha) / (Salpha + 1)) )
-    # print time.time() - t
-
-    # t = time.time()
     res2 = (sf**2 / np.prod((X_S[:, :] * alpha[None, :] + 1.)**0.5, 1)[:, None]) * np.exp(-0.5*np.sum( ( (Z[None, :, :] - X_mu[:, None, :])**2 * alpha[None, None, :] ) / (alpha[None, None, :] * X_S[:, None, :] + 1.) , 2))
-    # print time.time() - t
-
-    # assert np.sum(np.abs(res - res2)) < 10**-12
 
     return res2
 
@@ -139,10 +97,6 @@ def calc_expect_K_mi_K_im_old (Z, hyp_ard, X_mu, X_S):
 
     Returns:
         MxM matrix: <K_{m<i>} K_{<i>m>}>_q(X_i)
-
-    Status:
-        Finished
-        Untested
     '''
     # input assertions
     assert np.all(X_S >= 0.0)
@@ -190,10 +144,6 @@ def calc_expect_K_mi_K_im (Z, hyp_ard, X_mu, X_S):
         t1 = -0.25 * np.sum(alpha[None, None, :] * (Z[:, None, :] - Z)**2, 2)
         t2 = -np.sum( alpha[None, None, :] * (mu[None, None, :] - 0.5*Z[:, None, :] - 0.5*Z)**2 / (2*alpha*s+1)[None, None, :], 2)
         res += const * np.exp(t1 + t2)
-
-    #res_old = calc_expect_K_mi_K_im_old(Z, hyp_ard, X_mu, X_S)
-    #assert(np.max(np.abs(res - res_old)) < 10**-6)
-
 
     return res
 
